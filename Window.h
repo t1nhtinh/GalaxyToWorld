@@ -51,6 +51,7 @@ public:
     static void rotateCamera(glm::vec3, float);
     static void initializePointsArray();
     
+    static void moveCoaster(); 
     
 };
 

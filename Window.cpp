@@ -307,77 +307,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
-    glm::vec3 position;
-    
-    //Move the Roller Coaster around the track
-    if(coaster->translateMode == true){
-        
-
-        //Apply PHYSICS
-        if (coaster->physiceMode == true) {
-        
-            //update current height of sphere
-            currH = coaster->toWorld[3][1];
-            //Compute deltaH: should always be negative except at highest point where deltaH = 0
-            deltaH = currH - maxH;
-            
-            //velocity formula
-            velocity = sqrt(-2.0 * a * deltaH) + c;
-            cout << velocity << ".. The velocity" << endl;
-            //store control point matrix of curve
-
-            glm::mat4 controlPts = bezierCurveArray[curveCount]->pointMatrix;
-            
-            float len = lengthOfCurve[curveCount];
-           
-            float t = (lineCount)/ 150.0;
-            
-            //Apply physics in Bezier curve space: t + v
-            float physics = t + (velocity / len); //t + v
-            
-            lineCount++; //increment to next line
-            
-            //If sphere has moved through 150 lines, reset lines to 0 and move on to next curve
-            //If (t + v) > 1.0 move on to next curve. Simply subtract 1 from t
-            if(curveCount == 8){
-                curveCount = 0;
-            }
-            
-            if(lineCount == 150 || physics > 1.0){
-                lineCount = 0;
-                curveCount++;
-
-                if(curveCount == 8){
-                    curveCount = 0;
-                }
-            }
-            else {
-
-                position = handlePtr->createCubicBezierCurve(controlPts, physics);
-                
-                //Modify position of sphere
-                coaster->toWorld[3] = glm::vec4(position, 1.0f);
-            }
-                
-        }
-        //Move coaster without physics
-        else
-        {
-            //Modify position of sphere
-            coaster->toWorld[3] = glm::vec4(pathArray[curveCount][lineCount], 1.0f);
-            lineCount++;
-        
-            //cout << lineCount << "determine which line it has reached" << endl;
-            if(lineCount == 150){
-                lineCount = 0;
-                curveCount++;
-                
-                if(curveCount == 8){
-                    curveCount = 0;
-                }
-            }
-        }
-    }
+    //moveCoaster();
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -407,12 +337,12 @@ void Window::display_callback(GLFWwindow* window)
 
     
     //Draw roller Coaster
-    glUseProgram(curveShaderProgram);
-    rollerCoaster->draw(curveShaderProgram, glm::mat4(1.0f));
+   // glUseProgram(curveShaderProgram);
+    //rollerCoaster->draw(curveShaderProgram, glm::mat4(1.0f));
 
     //Draw handles points
    // handlePtr->draw(curveShaderProgram, glm::mat4(1.0f));
-    handlePtr->drawCurve(curveShaderProgram);
+    //handlePtr->drawCurve(curveShaderProgram);
 
     // Swap buffers
     glfwSwapBuffers(window); //If flash occurs put this line before pollEvents
@@ -738,6 +668,81 @@ void Window::rotateCamera(glm::vec3 rot_axis, float rot_angle){
     // recalculate V the view matrix
     V = glm::lookAt(cam_pos, cam_look_at, cam_up);
     
+}
+
+void Window::moveCoaster(){
+    glm::vec3 position;
+    
+    //Move the Roller Coaster around the track
+    if(coaster->translateMode == true){
+        
+        
+        //Apply PHYSICS
+        if (coaster->physiceMode == true) {
+            
+            //update current height of sphere
+            currH = coaster->toWorld[3][1];
+            //Compute deltaH: should always be negative except at highest point where deltaH = 0
+            deltaH = currH - maxH;
+            
+            //velocity formula
+            velocity = sqrt(-2.0 * a * deltaH) + c;
+            cout << velocity << ".. The velocity" << endl;
+            //store control point matrix of curve
+            
+            glm::mat4 controlPts = bezierCurveArray[curveCount]->pointMatrix;
+            
+            float len = lengthOfCurve[curveCount];
+            
+            float t = (lineCount)/ 150.0;
+            
+            //Apply physics in Bezier curve space: t + v
+            float physics = t + (velocity / len); //t + v
+            
+            lineCount++; //increment to next line
+            
+            //If sphere has moved through 150 lines, reset lines to 0 and move on to next curve
+            //If (t + v) > 1.0 move on to next curve. Simply subtract 1 from t
+            if(curveCount == 8){
+                curveCount = 0;
+            }
+            
+            if(lineCount == 150 || physics > 1.0){
+                lineCount = 0;
+                curveCount++;
+                
+                if(curveCount == 8){
+                    curveCount = 0;
+                }
+            }
+            else {
+                
+                position = handlePtr->createCubicBezierCurve(controlPts, physics);
+                
+                //Modify position of sphere
+                coaster->toWorld[3] = glm::vec4(position, 1.0f);
+            }
+            
+        }
+        //Move coaster without physics
+        else
+        {
+            //Modify position of sphere
+            coaster->toWorld[3] = glm::vec4(pathArray[curveCount][lineCount], 1.0f);
+            lineCount++;
+            
+            //cout << lineCount << "determine which line it has reached" << endl;
+            if(lineCount == 150){
+                lineCount = 0;
+                curveCount++;
+                
+                if(curveCount == 8){
+                    curveCount = 0;
+                }
+            }
+        }
+    }
+
 }
 
 void Window::initializePointsArray(){
