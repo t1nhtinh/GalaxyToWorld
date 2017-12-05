@@ -6,7 +6,8 @@
 
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
-GLint shaderProgram, skyboxShaderProgram, curveShaderProgram, selectionShaderProgram;
+GLint shaderProgram, skyboxShaderProgram, selectionShaderProgram;
+//curveShaderProgram 
 
 
 OBJObject * objectPtr;
@@ -34,16 +35,16 @@ BezierCurve * handlePtr;
 //#define VERTEX_SHADER_PATH "../shader.vert"
 //#define FRAGMENT_SHADER_PATH "../shader.frag"
 
-#define VERTEX_SHADER_PATH "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/shader.vert"
-#define FRAGMENT_SHADER_PATH "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/shader.frag"
-#define VERTEX_SKYBOXSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/skyboxShader.vert"
-#define FRAGMENT_SKYBOXSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/skyboxShader.frag"
+#define VERTEX_SHADER_PATH "../shader.vert"
+#define FRAGMENT_SHADER_PATH "../shader.frag"
+#define VERTEX_SKYBOXSHADER "../skyboxShader.vert"
+#define FRAGMENT_SKYBOXSHADER "../skyboxShader.frag"
 
-#define VERTEX_CURVESHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/curve.vert"
-#define FRAGMENT_CURVESHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/curve.frag"
+//#define VERTEX_CURVESHADER "../curve.vert"
+//#define FRAGMENT_CURVESHADER "../curve.frag"
 
-#define VERTEX_SELECTIONSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/selection.vert"
-#define FRAGMENT_SELECTIONSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/selection.frag"
+#define VERTEX_SELECTIONSHADER "../selection.vert"
+#define FRAGMENT_SELECTIONSHADER "../selection.frag"
 
 //Lighting
 Light * light_ptr;
@@ -93,13 +94,12 @@ void Window::initialize_objects()
     dir_light = new Light(0);
     point_light = new Light(1);
     spot_light = new Light(2);
-    
 	cube = new Cube();
     
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
     skyboxShaderProgram = LoadShaders(VERTEX_SKYBOXSHADER, FRAGMENT_SKYBOXSHADER);
-    curveShaderProgram = LoadShaders(VERTEX_CURVESHADER, FRAGMENT_CURVESHADER);
+   // curveShaderProgram = LoadShaders(VERTEX_CURVESHADER, FRAGMENT_CURVESHADER);
     selectionShaderProgram = LoadShaders(VERTEX_SELECTIONSHADER, FRAGMENT_SELECTIONSHADER);
     
     
@@ -121,12 +121,12 @@ void Window::initialize_objects()
     
     //Construct sphere for anchor control points and approximating control points
     anchorPtr = new Geode();
-    anchorPtr->spherePtr = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
+    anchorPtr->spherePtr = new OBJObject("sphere.obj");
     anchorPtr->isSphere = true;
     anchorPtr->spherePtr->matMode = 1; //Color control/anchor points red
     
     approxControlPtr = new Geode();
-    approxControlPtr->spherePtr = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
+    approxControlPtr->spherePtr = new OBJObject("sphere.obj");
     approxControlPtr->isSphere = true;
     approxControlPtr->spherePtr->matMode = 2; //Color approximating control points green
     
@@ -218,11 +218,11 @@ void Window::initialize_objects()
     }
     
     //Create the roller coaster using a sphere
-    coaster = new OBJObject ("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
+    coaster = new OBJObject ("sphere.obj");
     
-    glm::mat4 scaleCoaster = glm::scale((glm::mat4(1.0f), glm::vec3(5.0f)));
+    glm::mat4 scaleCoaster = glm::scale((glm::mat4(1.0f), glm::vec3(50.0f)));
     coaster->toWorld = scaleCoaster * coaster->toWorld;
-    coaster->toWorld[3] = glm::vec4(start, 1.0f);
+    coaster->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
     
     objectPtr = coaster;
 }
@@ -344,11 +344,12 @@ void Window::display_callback(GLFWwindow* window)
    // handlePtr->draw(curveShaderProgram, glm::mat4(1.0f));
     //handlePtr->drawCurve(curveShaderProgram);
 
+   	// Gets events, including input such as keyboard and mouse or window resizing
+	glfwPollEvents();
     // Swap buffers
     glfwSwapBuffers(window); //If flash occurs put this line before pollEvents
 
-   	// Gets events, including input such as keyboard and mouse or window resizing
-	glfwPollEvents();
+
 //	// Swap buffers
 //	glfwSwapBuffers(window); //If flash occurs put this line before pollEvents
 }

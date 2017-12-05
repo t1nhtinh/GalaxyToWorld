@@ -18,12 +18,12 @@ Cube::Cube()
 {
 	toWorld = glm::mat4(1.0f);
 
-    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_ft.tga");
-    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_bk.tga");
-    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_up.tga");
-    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_dn.tga");
-    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_rt.tga");
-    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_lf.tga");
+    images.push_back("../texture/stratosphere_ft.tga");
+    images.push_back("../texture/stratosphere_bk.tga");
+    images.push_back("../texture/stratosphere_up.tga");
+    images.push_back("../texture/stratosphere_dn.tga");
+    images.push_back("../texture/stratosphere_rt.tga");
+    images.push_back("../texture/stratosphere_lf.tga");
     
     
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
@@ -180,7 +180,7 @@ unsigned int Cube::loadCubemap(vector<std::string> faces)
         }
         else
         {
-            std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+         //   std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
             stbi_image_free(data);
         }
     }

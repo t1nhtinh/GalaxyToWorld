@@ -63,11 +63,6 @@ void setup_opengl_settings()
 	// Set clear color
 	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
     
-    
-    //Create standard cursor
-    GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
-    glfwSetCursor(window, cursor);
-    
 }
 
 void print_versions()
