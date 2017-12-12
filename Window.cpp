@@ -6,7 +6,7 @@
 
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
-GLint shaderProgram, skyboxShaderProgram, selectionShaderProgram;
+GLint shaderProgram, skyboxShaderProgram, selectionShaderProgram,toonShaderProgram;
 //curveShaderProgram 
 
 
@@ -40,8 +40,8 @@ BezierCurve * handlePtr;
 #define VERTEX_SKYBOXSHADER "../skyboxShader.vert"
 #define FRAGMENT_SKYBOXSHADER "../skyboxShader.frag"
 
-//#define VERTEX_CURVESHADER "../curve.vert"
-//#define FRAGMENT_CURVESHADER "../curve.frag"
+#define VERTEX_TOONSHADER "../environmentshader.vert"
+#define FRAGMENT_TOONSHADER "../environmentshader.frag"
 
 #define VERTEX_SELECTIONSHADER "../selection.vert"
 #define FRAGMENT_SELECTIONSHADER "../selection.frag"
@@ -100,12 +100,12 @@ void Window::initialize_objects()
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
     skyboxShaderProgram = LoadShaders(VERTEX_SKYBOXSHADER, FRAGMENT_SKYBOXSHADER);
    // curveShaderProgram = LoadShaders(VERTEX_CURVESHADER, FRAGMENT_CURVESHADER);
+	toonShaderProgram = LoadShaders(VERTEX_TOONSHADER, FRAGMENT_TOONSHADER);
     selectionShaderProgram = LoadShaders(VERTEX_SELECTIONSHADER, FRAGMENT_SELECTIONSHADER);
     
     
     light_ptr = dir_light;
     light_ptr->lightMode = 0;
-   // objectPtr->matMode = 0;
     
     //Initialize control points and store in an array
     initializePointsArray();
@@ -225,17 +225,20 @@ void Window::initialize_objects()
     coaster->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
     
     objectPtr = coaster;
+    objectPtr->matMode = 0;
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
 	delete(cube);
+	delete(coaster);
     delete(dir_light);
     delete(spot_light);
     delete(point_light);
     
 	glDeleteProgram(shaderProgram);
+	glDeleteProgram(toonShaderProgram);
     glDeleteProgram(skyboxShaderProgram);
 }
 
@@ -318,11 +321,11 @@ void Window::display_callback(GLFWwindow* window)
     
   
     // Use the shader of programID
-	//glUseProgram(shaderProgram);
     
-    //objectPtr->drawSpere(shaderProgram);
+	glUseProgram(toonShaderProgram);
+    objectPtr->drawSpere(toonShaderProgram);
     
-    
+//	glUseProgram(shaderProgram);
 //    light_ptr->draw(shaderProgram);
     // Render the cube
 //	//cube->draw(shaderProgram);
@@ -330,10 +333,8 @@ void Window::display_callback(GLFWwindow* window)
     
     cube->drawSkybox(skyboxShaderProgram);
    
-    GLuint camPos = glGetUniformLocation(skyboxShaderProgram, "cameraPos");
-    glUniform3fv(camPos, 1, &cam_pos[0]);
     
-    coaster->draw(skyboxShaderProgram);
+//    coaster->draw(skyboxShaderProgram);
 
     
     //Draw roller Coaster
@@ -372,10 +373,12 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
         else if ( key == GLFW_KEY_P && mods & GLFW_MOD_SHIFT)
         {
             coaster->translateMode = false;
+			coaster->translateX(5);
         }
         else if ( key == GLFW_KEY_P )
         {
             coaster->translateMode = true;
+			coaster->translateX(-5);
         }
         else if (key == GLFW_KEY_S)
         {
@@ -402,10 +405,12 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
         else if ( key == GLFW_KEY_F && mods & GLFW_MOD_SHIFT)
         {
             coaster->physiceMode = false;
+			coaster->translateY(5);
         }
         else if (key == GLFW_KEY_F)
         {
             coaster->physiceMode = true;
+			coaster->translateY(-5);
         
         }
     

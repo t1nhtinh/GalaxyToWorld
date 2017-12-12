@@ -242,7 +242,6 @@ void OBJObject::draw(GLuint shaderProgram)
     // Now draw the object. We simply need to bind the VAO associated with it.
     glBindVertexArray(VAO);
     
-    
     if(matMode == 0){
         renderMaterial(shaderProgram, matMode);
     }
@@ -276,21 +275,25 @@ void OBJObject::drawSpere(GLuint shaderProgram)
     // Consequently, we need to forward the projection, view, and model matrices to the shader programs
     // Get the location of the uniform variables "projection" and "modelview"
     uProjection = glGetUniformLocation(shaderProgram, "projection");
-    uModelview = glGetUniformLocation(shaderProgram, "modelview");
-//    view = glGetUniformLocation(shaderProgram, "view");
-//    model = glGetUniformLocation(shaderProgram, "model");
+    //uModelview = glGetUniformLocation(shaderProgram, "modelview");
+    view = glGetUniformLocation(shaderProgram, "view");
+    model = glGetUniformLocation(shaderProgram, "model");
+    GLuint camPos = glGetUniformLocation(shaderProgram, "camPos");
 //    
     // Now send these values to the shader program
     glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
-    glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
-   // glUniformMatrix4fv(view, 1, GL_FALSE, &Window::V[0][0]);
-   // glUniformMatrix4fv(model, 1, GL_FALSE, &toWorld[0][0]);
-    
+   // glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
+    glUniformMatrix4fv(view, 1, GL_FALSE, &Window::V[0][0]);
+    glUniformMatrix4fv(model, 1, GL_FALSE, &toWorld[0][0]);
+
+    glm::vec3 cam_pos(0.0f, 0.0f, 200.0f);		// e  | Position of camera
+    glUniform3f(camPos,cam_pos[0],cam_pos[1],cam_pos[2]);
     
     // Now draw the object. We simply need to bind the VAO associated with it.
     glBindVertexArray(VAO);
     
 //    cout << matMode << endl;
+	/*
     if (matMode == 1)
     {
         renderMaterial(shaderProgram, matMode);
@@ -299,6 +302,10 @@ void OBJObject::drawSpere(GLuint shaderProgram)
     {
         renderMaterial(shaderProgram, matMode);
     }
+    else if (matMode == 3) {
+        GLuint materialAttr = glGetUniformLocation(shaderProgram, "material.mode");
+        glUniform1i(materialAttr, matMode);
+    }*/
 
     
     // Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
