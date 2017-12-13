@@ -22,7 +22,8 @@ public:
 	Cube();
 	~Cube();
 
-	glm::mat4 toWorld;
+	glm::mat4 toWorld; 
+	unsigned int cubemap;
 
 	void draw(GLuint);
     void drawSkybox(GLuint);

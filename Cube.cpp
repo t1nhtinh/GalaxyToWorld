@@ -24,6 +24,7 @@ Cube::Cube()
     images.push_back("../texture/stratosphere_dn.tga");
     images.push_back("../texture/stratosphere_rt.tga");
     images.push_back("../texture/stratosphere_lf.tga");
+	cubemap = loadCubemap(images);
     
     
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
@@ -126,7 +127,6 @@ void Cube::drawSkybox(GLuint shaderProgram)
     glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
     glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
     
-  
     //draw skybox as last
     glDepthFunc(GL_LEQUAL);
     // change depth function so depth test passes when values are equal to depth buffer's content
@@ -134,7 +134,7 @@ void Cube::drawSkybox(GLuint shaderProgram)
     glBindVertexArray(skyboxVAO);
     glActiveTexture(GL_TEXTURE0);
     
-    unsigned int cubemapTexture = loadCubemap(images);
+	unsigned int cubemapTexture = cubemap;
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
     glDrawArrays(GL_TRIANGLES, 0, 36);

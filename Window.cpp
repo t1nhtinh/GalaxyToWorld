@@ -1,39 +1,21 @@
 #include "Window.h"
 #include "Node.h"
 #include "MatrixTransform.h"
+#include "Plant.h"
+#include "PlantTransform.h"
 #include "Geode.h"
 #include <time.h>
 
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
 GLint shaderProgram, skyboxShaderProgram, selectionShaderProgram,toonShaderProgram;
-//curveShaderProgram 
-
 
 OBJObject * objectPtr;
 OBJObject * bunny;
 OBJObject * dragon;
 OBJObject * bear;
 OBJObject * coaster;
-
-MatrixTransform * rollerCoaster; // roller coaster of bezier curves
-MatrixTransform * bezPtr; //single cubic bezier curve
-MatrixTransform * curveMtxPtr; //bezier curve matrix
-MatrixTransform * sphereMtxPtr; //family of sphere matrices
-MatrixTransform * selectionPtr; //family of control points
-MatrixTransform * coasterMtx;
-
-Geode * curvePtr;
-Geode * anchorPtr;
-Geode * approxControlPtr;
-//Geode * handlePtr;
-Geode * coasterPtr;
-
-BezierCurve * handlePtr;
-
-// On some systems you need to change this to the absolute path
-//#define VERTEX_SHADER_PATH "../shader.vert"
-//#define FRAGMENT_SHADER_PATH "../shader.frag"
+OBJObject * sunSphere;
 
 #define VERTEX_SHADER_PATH "../shader.vert"
 #define FRAGMENT_SHADER_PATH "../shader.frag"
@@ -46,12 +28,6 @@ BezierCurve * handlePtr;
 #define VERTEX_SELECTIONSHADER "../selection.vert"
 #define FRAGMENT_SELECTIONSHADER "../selection.frag"
 
-//Lighting
-Light * light_ptr;
-Light * dir_light;
-Light * point_light;
-Light * spot_light;
-
 // Default camera parameters
 glm::vec3 cam_pos(0.0f, 0.0f, 200.0f);		// e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
@@ -60,24 +36,11 @@ glm::vec3 prev_position;
 glm::vec3 curr_position;
 double curr_x, curr_y;
 
-
 int Window::width;
 int Window::height;
 
 glm::mat4 Window::P;
 glm::mat4 Window::V;
-
-vector<glm::vec3> pointsArray;
-vector<glm::vec3> handlePointsArray;
-vector<vector<glm::vec3>> pathArray;
-vector<float> lengthOfCurve;
-vector<BezierCurve*> bezierCurveArray;
-vector<OBJObject*> sphereArray;
-vector<MatrixTransform*> sphereMtxArray;
-
-
-int curveCount = 0; //8 curves
-int lineCount = 0; //150 line segments per curve
 
 int startCurve, startLine;
 
@@ -89,133 +52,40 @@ glm::vec3 start; //position coaster at the highest point
 float deltaH = 0.0; //max height of track - current height of sphere
 float currH = 0.0;
 int id;
+
+
+glm::vec3 sun;
+bool lButtonDown;
+glm::vec3 prevPos;
+bool tZ;
+
+//L-System Plants
+vector<PlantTransform*> plants;
+int drawCounter = 0;
+
+Plant * fern;
+vector<PlantTransform*> ferns;
+int fernGrowth;
+
+Plant * plant4;
+vector<PlantTransform*> plant4s;
+int plant4Growth;
+
+Plant * branch;
+vector<PlantTransform*> branches;
+int branchGrowth;
+
 void Window::initialize_objects()
 {
-    dir_light = new Light(0);
-    point_light = new Light(1);
-    spot_light = new Light(2);
+	lButtonDown = false;
+
 	cube = new Cube();
     
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
     skyboxShaderProgram = LoadShaders(VERTEX_SKYBOXSHADER, FRAGMENT_SKYBOXSHADER);
-   // curveShaderProgram = LoadShaders(VERTEX_CURVESHADER, FRAGMENT_CURVESHADER);
 	toonShaderProgram = LoadShaders(VERTEX_TOONSHADER, FRAGMENT_TOONSHADER);
     selectionShaderProgram = LoadShaders(VERTEX_SELECTIONSHADER, FRAGMENT_SELECTIONSHADER);
-    
-    
-    light_ptr = dir_light;
-    light_ptr->lightMode = 0;
-    
-    //Initialize control points and store in an array
-    initializePointsArray();
-    
-    
-    //Initialize handle points after populating points array
-    handlePtr = new BezierCurve(glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f));
-    handlePointsArray = handlePtr->initHandlePoints(pointsArray);
-    
-    //Initalize the rollerCoaster Matrix Transform to store the family of Bezier Curves
-    rollerCoaster = new MatrixTransform(glm::mat4(1.0f));
-    
-    
-    //Construct sphere for anchor control points and approximating control points
-    anchorPtr = new Geode();
-    anchorPtr->spherePtr = new OBJObject("sphere.obj");
-    anchorPtr->isSphere = true;
-    anchorPtr->spherePtr->matMode = 1; //Color control/anchor points red
-    
-    approxControlPtr = new Geode();
-    approxControlPtr->spherePtr = new OBJObject("sphere.obj");
-    approxControlPtr->isSphere = true;
-    approxControlPtr->spherePtr->matMode = 2; //Color approximating control points green
-    
-    int P0 = 0;
-    int P1 = 1;
-    int P2 = 2;
-    int P3 = 3;
-    
-    //Create a matrix transform to draw spheres in back buffer
-    selectionPtr = new MatrixTransform(glm::mat4(1.0f));
-    
-    
-    /** Scene Graph to display rollar coast **/
-    for(int i = 0; i < 8; i++){
-        /** Initialize roller coaster using scene graph **/
-        bezPtr = new MatrixTransform(glm::mat4(1.0f));
-
-        curvePtr = new Geode(); //initialize Geode object
-        
-        //Initialize bezier curve within Geode object
-        curvePtr->bezierCurve = new BezierCurve(pointsArray[P0], pointsArray[P1], pointsArray[P2], pointsArray[P3]);
-        bezierCurveArray.push_back(curvePtr->bezierCurve);
-        lengthOfCurve.push_back(curvePtr->bezierCurve->length);
-        
-        curvePtr->isCurve = true; 
-        bezPtr->addChild(curvePtr); //add curve object as child of Matrix Transform
-        
-
-        /** 1. Position spheres at control points
-          * 2. add sphere Geode as child to sphere matrix
-          * 3. add sphere Matrix Transform as child to bezier curve matrix
-          * 4. For selection buffer, store a scene graph containing on the control points to be drawn in the back buff
-          *     a. Associate an ID for each control point sphere
-          */
-        sphereMtxPtr = new MatrixTransform( curvePtr->bezierCurve->toWorld *  glm::translate(glm::mat4(1.0f), curvePtr->bezierCurve->P0));
-        sphereMtxPtr->addChild(anchorPtr);
-        bezPtr->addChild(sphereMtxPtr);
-        selectionPtr->addChild(sphereMtxPtr);
-        sphereMtxArray.push_back(sphereMtxPtr);
-        
-        
-    
-        sphereMtxPtr = new MatrixTransform( curvePtr->bezierCurve->toWorld *  glm::translate(glm::mat4(1.0f), curvePtr->bezierCurve->P1));
-        sphereMtxPtr->addChild(approxControlPtr);
-        bezPtr->addChild(sphereMtxPtr);
-        selectionPtr->addChild(sphereMtxPtr);
-        sphereMtxArray.push_back(sphereMtxPtr);
-
-      
-        
-        sphereMtxPtr = new MatrixTransform( curvePtr->bezierCurve->toWorld *  glm::translate(glm::mat4(1.0f), curvePtr->bezierCurve->P2));
-        sphereMtxPtr->addChild(approxControlPtr);
-        bezPtr->addChild(sphereMtxPtr);
-        selectionPtr->addChild(sphereMtxPtr);
-        sphereMtxArray.push_back(sphereMtxPtr);
-
-        
-        sphereMtxPtr = new MatrixTransform( curvePtr->bezierCurve->toWorld *  glm::translate(glm::mat4(1.0f), curvePtr->bezierCurve->P3));
-        sphereMtxPtr->addChild(anchorPtr);
-        bezPtr->addChild(sphereMtxPtr);
-        selectionPtr->addChild(sphereMtxPtr);
-        sphereMtxArray.push_back(sphereMtxPtr);
-
-      
-        // Add childs to Family of bezier curves and control points
-        rollerCoaster->addChild(bezPtr);
-        
-        P0 += 4;
-        P1 += 4;
-        P2 += 4;
-        P3 += 4;
-        
-        pathArray.push_back(curvePtr->bezierCurve->vertices); //Grab the path
-    
-    }
-
-    //iterate through path and store max height
-    for(int j = 0; j < pathArray.size(); j++){
-        for (int k = 0; k < pathArray[j].size(); k++){
-            if(maxH < pathArray[j][k].y){
-                maxH = pathArray[j][k].y;
-                start = pathArray[j][k];
-                
-                //Set the starting position of the roller coaster at highest point
-                startCurve = curveCount = j;
-                startLine = lineCount = k;
-            }
-        }
-    }
     
     //Create the roller coaster using a sphere
     coaster = new OBJObject ("sphere.obj");
@@ -223,28 +93,165 @@ void Window::initialize_objects()
     glm::mat4 scaleCoaster = glm::scale((glm::mat4(1.0f), glm::vec3(50.0f)));
     coaster->toWorld = scaleCoaster * coaster->toWorld;
     coaster->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
-    
+
     objectPtr = coaster;
     objectPtr->matMode = 0;
+
+	initializeFerns(3);
+	fernGrowth = 1;
+	initializePlant4s(3);
+	plant4Growth = 1;
+	initializeBranch(3);
+	branchGrowth = 1;
+
+	//Initialize the sun
+	sunSphere = new OBJObject("sphere.obj");
+	sun = glm::vec3(glm::vec3(-25, 13, 150));
+	sunSphere->toWorld[3] = glm::vec4(sun,1.0f);
+	tZ = false;// switch for control over camera or sun
+}
+
+void Window::initializeBranch(int n) {
+	//Branch style plants setup 
+	branch = new Plant(5,2.0f);
+
+	for (int i = 0; i < n; i++) {
+		PlantTransform * p = new PlantTransform("branch", objectPtr->toWorld);
+		p->addChild(branch);
+		p->loadPlant(1,2);//initialize with height of 1
+		plants.push_back(p);
+		branches.push_back(p);
+	}
+}
+void Window::drawBranches(GLint shader) {
+	glUseProgram(shader);
+	GLuint uLightPos = glGetUniformLocation(shader, "lightPosInput");
+	glUniform3f(uLightPos, sun[0], sun[1], sun[2]);
+
+	glm::mat4 tempWorld = glm::scale(glm::mat4(1), glm::vec3(1.0f / 50.0f)) * objectPtr->toWorld;
+	glm::mat4 inverseRotateWorld = glm::transpose(tempWorld);
+
+	float rot_on_sphere = 0;
+	float tran_on_sphere = 0;
+	for (int i = 0; i < branches.size(); i++) {
+		rot_on_sphere += 5.0f;
+		tran_on_sphere += 5.0f;
+		if (rot_on_sphere > 90.0f) {
+			rot_on_sphere = 0.0f;
+		}
+
+		tempWorld = glm::rotate(glm::mat4(1.0f), 
+			glm::radians(rot_on_sphere), glm::vec3(0, 0, 1))
+			*  inverseRotateWorld;
+		tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+			glm::vec3(tran_on_sphere,0,0));
+		branches[i]->draw(shader, tempWorld);
+	}
+}
+
+void Window::initializePlant4s(int n) {
+	//Plant 4 style plants setup 
+	plant4 = new Plant(5,2.0f);
+
+	for (int i = 0; i < n; i++) {
+		PlantTransform * p = new PlantTransform("plant4 ", objectPtr->toWorld);
+		p->addChild(plant4);
+		p->loadPlant(1,1);
+		plants.push_back(p);
+		plant4s.push_back(p);
+	}
+}
+void Window::drawPlant4s(GLint shader) {
+	glUseProgram(shader);
+	GLuint uLightPos = glGetUniformLocation(shader, "lightPosInput");
+	glUniform3f(uLightPos, sun[0], sun[1], sun[2]);
+	glm::mat4 tempWorld = glm::scale(glm::mat4(1), glm::vec3(1.0f / 50.0f)) * objectPtr->toWorld;
+	glm::mat4 inverseRotateWorld = glm::transpose(tempWorld);
+
+	//plant4s[0]->draw(shader, tempWorld);
+
+	float rot_on_sphere = 0;
+	float tran_on_sphere = 0;
+	for (int i = 0; i < plant4s.size(); i++) {
+		rot_on_sphere += 5.0f;
+		tran_on_sphere += 0.2f;
+		if (rot_on_sphere > 90.0f) {
+			rot_on_sphere = 0.0f;
+		}
+
+		tempWorld = glm::rotate(glm::mat4(1.0f), 
+			glm::radians(rot_on_sphere), glm::vec3(1, 0, 0))
+			*  inverseRotateWorld;
+		tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+			glm::vec3(tran_on_sphere,0,0));
+		plant4s[i]->draw(shader, tempWorld);
+	}
+}
+
+void Window::initializeFerns(int n) {
+	//Ferns style plants setup 
+	fern = new Plant(25,2.0f);
+	fern->setupRuleSets();
+
+	for (int i = 0; i < n; i++) {
+		PlantTransform * p = new PlantTransform("fern ", objectPtr->toWorld);
+		p->addChild(fern);
+		p->loadPlant(1,0);
+		plants.push_back(p);
+		ferns.push_back(p);
+	}
+}
+
+void Window::drawFerns(GLint shader) {
+	glUseProgram(shader);
+	GLuint uLightPos = glGetUniformLocation(shader, "lightPosInput");
+	glUniform3f(uLightPos, sun[0], sun[1], sun[2]);
+	glm::mat4 tempWorld = glm::scale(glm::mat4(1), glm::vec3(1.0f / 50.0f)) * objectPtr->toWorld;
+	glm::mat4 inverseRotateWorld = glm::transpose(tempWorld);
+
+	float rot_on_sphere = 0;
+	float tran_on_sphere = 0;
+	for (int i = 0; i < ferns.size(); i++) {
+		rot_on_sphere += 5.0f;
+		tran_on_sphere += 0.1f;
+		if (rot_on_sphere > 90.0f) {
+			rot_on_sphere = 0.0f;
+		}
+
+		tempWorld = glm::rotate(glm::mat4(1.0f), 
+			glm::radians(rot_on_sphere), glm::vec3(-1, 0, 0))
+			*  inverseRotateWorld;
+		tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+			glm::vec3(tran_on_sphere,0,0));
+		ferns[i]->draw(shader, tempWorld);
+	}
+		
+}
+
+void Window::cleanGarden() {
+	delete(fern);
+	delete(plant4);
+	delete(branch);
+	for (auto & plant : plants) {
+		delete(plant);
+	}
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
-	delete(cube);
-	delete(coaster);
-    delete(dir_light);
-    delete(spot_light);
-    delete(point_light);
-    
-	glDeleteProgram(shaderProgram);
-	glDeleteProgram(toonShaderProgram);
-    glDeleteProgram(skyboxShaderProgram);
+  delete(cube);
+  delete(coaster);
+  cleanGarden();
+  delete(sunSphere);
+
+  glDeleteProgram(shaderProgram);
+  glDeleteProgram(toonShaderProgram);
+  glDeleteProgram(skyboxShaderProgram);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
 {
-
 	// Initialize GLFW
 	if (!glfwInit())
 	{
@@ -311,48 +318,52 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
     //moveCoaster();
+	objectPtr->update();
+	if (plant4Growth > 4) {
+		plant4Growth = 1;
+	}
+	if (branchGrowth > 4) {
+		branchGrowth = 1;
+	}
+	if (fernGrowth > 4) {
+		fernGrowth = 1;
+	}
+	if (objectPtr->angle == 270.0f) {
+		plant4s[0]->loadPlant(plant4Growth, 1);
+		branches[0]->loadPlant(branchGrowth, 2);
+		ferns[0]->loadPlant(fernGrowth, 0);
+
+		plant4Growth++;
+		branchGrowth++;
+		fernGrowth++;
+	}
 }
 
 void Window::display_callback(GLFWwindow* window)
 {
-    
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-  
+
     // Use the shader of programID
     
 	glUseProgram(toonShaderProgram);
+	GLuint uLightPos = glGetUniformLocation(toonShaderProgram, "lightPosInput");
+	glUniform3f(uLightPos, sun[0], sun[1], sun[2]);
     objectPtr->drawSpere(toonShaderProgram);
+	sunSphere->drawSpere(toonShaderProgram);
     
-//	glUseProgram(shaderProgram);
-//    light_ptr->draw(shaderProgram);
-    // Render the cube
-//	//cube->draw(shaderProgram);
     glUseProgram(skyboxShaderProgram);
     
     cube->drawSkybox(skyboxShaderProgram);
    
-    
-//    coaster->draw(skyboxShaderProgram);
-
-    
-    //Draw roller Coaster
-   // glUseProgram(curveShaderProgram);
-    //rollerCoaster->draw(curveShaderProgram, glm::mat4(1.0f));
-
-    //Draw handles points
-   // handlePtr->draw(curveShaderProgram, glm::mat4(1.0f));
-    //handlePtr->drawCurve(curveShaderProgram);
+	drawFerns(toonShaderProgram);
+	drawPlant4s(toonShaderProgram);
+	drawBranches(toonShaderProgram);
 
    	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
     // Swap buffers
     glfwSwapBuffers(window); //If flash occurs put this line before pollEvents
-
-
-//	// Swap buffers
-//	glfwSwapBuffers(window); //If flash occurs put this line before pollEvents
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -370,6 +381,15 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+		else if (key == GLFW_KEY_8) {
+			plant4->isGridline = !plant4->isGridline;
+			branch->isGridline = !branch->isGridline;
+			fern->isGridline = !fern->isGridline;
+		}
+		else if (key == GLFW_KEY_2) {
+			tZ = !tZ;
+			//cout << glm::to_string(plant4->lastNormal) << endl;
+		}
         else if ( key == GLFW_KEY_P && mods & GLFW_MOD_SHIFT)
         {
             coaster->translateMode = false;
@@ -380,46 +400,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
             coaster->translateMode = true;
 			coaster->translateX(-5);
         }
-        else if (key == GLFW_KEY_S)
-        {
-            coaster->toWorld[3] = glm::vec4(start, 1.0f);
-            //Ensure that sphere follows path from starting from highestpoint
-            curveCount = startCurve;
-            lineCount = startLine;
-            
-            //iterate through path and store max height
-            for(int m = 0; m < pathArray.size(); m++){
-                for (int n = 0; n < pathArray[m].size(); n++){
-                    if(maxH < pathArray[m][n].y){
-                        maxH = pathArray[m][n].y;
-                        start = pathArray[m][n];
-                        
-                        //Set the starting position of the roller coaster at highest point
-                        startCurve = curveCount = m;
-                        startLine = lineCount = n;
-                    }
-                }
-            }
-
-        }
-        else if ( key == GLFW_KEY_F && mods & GLFW_MOD_SHIFT)
-        {
-            coaster->physiceMode = false;
-			coaster->translateY(5);
-        }
-        else if (key == GLFW_KEY_F)
-        {
-            coaster->physiceMode = true;
-			coaster->translateY(-5);
-        
-        }
-    
-
-
 	}
     
 }
-
 
 //Get mouse input
 void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
@@ -427,53 +410,39 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
     //save x,y as prev_position
     if(action == GLFW_RELEASE) {
         objectPtr->rotateMode = false;
-        selectionPtr->selectionMode = false;
 
     }
     //Detect rotation
     //On mouse click render the selection buffer to draw only spheres
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-    
-        prev_position.x = curr_x;
-        prev_position.y = curr_y;
-        
-        //Clear the scene to draw the control points in the back buffer
-         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-         glUseProgram(selectionShaderProgram);
-         selectionPtr->selectionMode = true;
-        
-        //Draw the control points
-        selectionPtr->draw(selectionShaderProgram, glm::mat4(1.0f));
-    
-        //Initilize an array to store pixel components
-        unsigned char pix[4];
-        
-        //Read pixel at cursor position
-        glReadPixels((GLint)curr_x*2, (GLint)(height - curr_y*2), 1,1,GL_RGBA, GL_UNSIGNED_BYTE, &pix);
-            
-        id = (int)pix[0] - 1;
-        
-    
-        
-        cout << id << " sphere selected" << endl;
- 
+		lButtonDown = true;
+        prev_position = trackBallMapping(curr_position.x, curr_position.y);
+
     }
     //Translation in the x-y plane
     //When the right mouse button is pressed and the mouse is moved, move the model in the plane of the screen (similar to what the 'x' and 'y' keys did). Scale this operation so that when the model is in the screen space z=0 plane, the model follows your mouse pointer as closely as possible.
     else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
-        
+		lButtonDown = false;
         prev_position = trackBallMapping(curr_position.x, curr_position.y);
         objectPtr->rotateMode = true;
-       
     }
-    
+	else {
+		lButtonDown = false;
+	}
 }
 
 // cursor_position_callback() will be automatically called whenever
 //mouse moves (as defined in main), so we never need to call it in our code.
 void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos){
+	if (lButtonDown) {
+		double x_trans = xpos - prevPos.x;
+		double y_trans = prevPos.y - ypos;
+		sunSphere->toWorld = sunSphere->toWorld * glm::translate(glm::mat4(1.0f),glm::vec3(x_trans/50.0f,y_trans/50.0f,0.0f));
+		sun = sunSphere->toWorld[3];
+	}
+	prevPos.x = xpos;
+	prevPos.y = ypos;
+
     glm::vec3 direction;
     
     //Store cursor position in global variable
@@ -512,108 +481,18 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
       */
     if(objectPtr->rotateMode == true ) {
         if(vel > 0.0001){
-            //objectPtr->rotate(rotationAxis, rotationAngle);
-            
+            objectPtr->rotate(rotationAxis, rotationAngle);
+			/*
+			cout << "SPHERE: "<< glm::to_string(objectPtr->toWorld) << endl;
+			cout << glm::to_string(pt1->M) << endl;
+            */
             //rotate camera
-            rotateCamera(rotationAxis, rotationAngle);
+//            rotateCamera(rotationAxis, rotationAngle);
         }
         prev_position = curr_position;
     }
-    //cout << curr_x << " " << curr_y << endl;
     curr_position.x = curr_x;
     curr_position.y = curr_y;
-    
-    auto translate_distance = curr_position - prev_position;
-    auto translateX = translate_distance.x;
-    auto translateY = translate_distance.y;
-    
-    if(selectionPtr->selectionMode == true){
-        
-        if(id >= 0 ){
-            int dup_0 = id/4;
-            int dup_1 = id % 4;
-            
-            //    P3 (or Q0) = (P2 + Q1) / 2
-            //    If P3/Q0 gets moved, move P2 and Q1 the same amount
-            //    If P2 gets moved, keep P3/Q0 in place and move Q1 by the negative amount
-            //    Do the same thing to P2 if Q1 gets moved
-
-            if(id == 0 || id == 31){
-                pointsArray[0].x = pointsArray[0].x - translateX;
-                pointsArray[0].y = pointsArray[0].y + translateY;
-                
-                pointsArray[31].x = pointsArray[31].x - translateX;
-                pointsArray[31].y = pointsArray[31].y + translateY;
-                
-                pointsArray[30].x = pointsArray[30].x - translateX;
-                pointsArray[30].y = pointsArray[30].y + translateY;
-                
-                pointsArray[1].x = pointsArray[1].x - translateX;
-                pointsArray[1].y = pointsArray[1].y + translateY;
-
-                
-            }
-            else if(id % 4 == 0 ){
-                pointsArray[id].x = pointsArray[id].x - translateX;
-                pointsArray[id].y = pointsArray[id].y + translateY;
-                
-                pointsArray[id - 1].x = pointsArray[id - 1].x - translateX;
-                pointsArray[id - 1].y = pointsArray[id - 1].y + translateY;
-                
-              
-
-            }
-            else if ((id + 1) % 4 == 0){
-                pointsArray[id].x = pointsArray[id].x - translateX;
-                pointsArray[id].y = pointsArray[id].y + translateY;
-                
-                pointsArray[id + 1].x = pointsArray[id + 1].x - translateX;
-                pointsArray[id + 1].y = pointsArray[id + 1].y + translateY;
-
-            }
-            else {
-            
-                pointsArray[id].x = pointsArray[id].x - translateX;
-                pointsArray[id].y = pointsArray[id].y + translateY;
-            }
-            
-            cout << id << " idddddd" << endl;
-            //cout << translateY << " Translate of Y" << endl;
-            // cout << translateX << " Translate of X" << endl;
-
-           // cout << pointsArray[id].x << " " << pointsArray[id].y << endl;
-            
-            int P0 = 0;
-            int P1 = 1;
-            int P2 = 2;
-            int P3 = 3;
-
-            pathArray.clear();
-            for(int k = 0; k < 8; k++){
-                bezierCurveArray[k]->computeVertices(pointsArray[P0], pointsArray[P1],pointsArray[P2], pointsArray[P3]);
-                sphereMtxArray[P0]->MT[3] = glm::vec4(pointsArray[P0], 1.0f);
-                sphereMtxArray[P1]->MT[3] = glm::vec4(pointsArray[P1], 1.0f);
-                sphereMtxArray[P2]->MT[3] = glm::vec4(pointsArray[P2], 1.0f);
-                sphereMtxArray[P3]->MT[3] = glm::vec4(pointsArray[P3], 1.0f);
-
-                P0 += 4;
-                P1 += 4;
-                P2 += 4;
-                P3 += 4;
-                
-                pathArray.push_back(bezierCurveArray[k]->vertices);
-            }
-            
-            
-            handlePtr->initHandlePoints(pointsArray);
-        }
-        
-        prev_position = curr_position;
-    }
-    
-    //set prev_pos = curr_pos
-    ///prev_position = curr_position;
-
 }
 
 
@@ -624,17 +503,30 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     glm::mat4 scaleM;
     glm::mat4 transM;
 
-    if( yoffset < 0 ) {
-        //scale object
-        objectPtr->translateZ(true);
-        
-    }
-    else {
-        
-        //scale object
-        objectPtr->translateZ(false);
-        
-    }
+	if (tZ) {
+
+
+		if (yoffset < 0) {
+			//scale object
+	//        objectPtr->translateZ(true);
+		sunSphere->translateZ(true);
+		sun = sunSphere->toWorld[3];
+	//	cout << glm::to_string(sun) << endl;
+
+		}
+		else {
+
+			//scale object
+	//        objectPtr->translateZ(false);
+		sunSphere->translateZ(false);
+		sun = sunSphere->toWorld[3];
+//		cout << glm::to_string(sun) << endl;
+
+		}
+	}
+	else 
+	Window::V = Window::V * glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, yoffset / 5.0f));
+
     
 //    glm::vec3 cameraPos = cam_pos + glm::vec3(transM[3]);
 //    
@@ -675,157 +567,3 @@ void Window::rotateCamera(glm::vec3 rot_axis, float rot_angle){
     V = glm::lookAt(cam_pos, cam_look_at, cam_up);
     
 }
-
-void Window::moveCoaster(){
-    glm::vec3 position;
-    
-    //Move the Roller Coaster around the track
-    if(coaster->translateMode == true){
-        
-        
-        //Apply PHYSICS
-        if (coaster->physiceMode == true) {
-            
-            //update current height of sphere
-            currH = coaster->toWorld[3][1];
-            //Compute deltaH: should always be negative except at highest point where deltaH = 0
-            deltaH = currH - maxH;
-            
-            //velocity formula
-            velocity = sqrt(-2.0 * a * deltaH) + c;
-            cout << velocity << ".. The velocity" << endl;
-            //store control point matrix of curve
-            
-            glm::mat4 controlPts = bezierCurveArray[curveCount]->pointMatrix;
-            
-            float len = lengthOfCurve[curveCount];
-            
-            float t = (lineCount)/ 150.0;
-            
-            //Apply physics in Bezier curve space: t + v
-            float physics = t + (velocity / len); //t + v
-            
-            lineCount++; //increment to next line
-            
-            //If sphere has moved through 150 lines, reset lines to 0 and move on to next curve
-            //If (t + v) > 1.0 move on to next curve. Simply subtract 1 from t
-            if(curveCount == 8){
-                curveCount = 0;
-            }
-            
-            if(lineCount == 150 || physics > 1.0){
-                lineCount = 0;
-                curveCount++;
-                
-                if(curveCount == 8){
-                    curveCount = 0;
-                }
-            }
-            else {
-                
-                position = handlePtr->createCubicBezierCurve(controlPts, physics);
-                
-                //Modify position of sphere
-                coaster->toWorld[3] = glm::vec4(position, 1.0f);
-            }
-            
-        }
-        //Move coaster without physics
-        else
-        {
-            //Modify position of sphere
-            coaster->toWorld[3] = glm::vec4(pathArray[curveCount][lineCount], 1.0f);
-            lineCount++;
-            
-            //cout << lineCount << "determine which line it has reached" << endl;
-            if(lineCount == 150){
-                lineCount = 0;
-                curveCount++;
-                
-                if(curveCount == 8){
-                    curveCount = 0;
-                }
-            }
-        }
-    }
-
-}
-
-void Window::initializePointsArray(){
-    
-    glm::vec3 point0(-70.0f, -70.0f, 60.0f);
-    glm::vec3 point1(-50.0f, -80.0f, 60.0f);
-    glm::vec3 point2(-10.0f, -25.0f, 40.0f);
-    glm::vec3 point3(0.0f, -10.0f, 40.0f);
-    pointsArray.push_back(point0);
-    pointsArray.push_back(point1);
-    pointsArray.push_back(point2);
-    pointsArray.push_back(point3);
-    
-    point0 =  glm::vec3(0.0f, -10.0f, 40.0f);
-    point1 = glm::vec3(5.0f, -5.0f, 50.0f);
-    point2 = glm::vec3(15.0f, -70.0f, 60.0f);
-    point3 = glm::vec3(40.0f, -60.0f, 40.0f);
-    pointsArray.push_back(point0);
-    pointsArray.push_back(point1);
-    pointsArray.push_back(point2);
-    pointsArray.push_back(point3);
-    
-    point0 =  glm::vec3(40.0f, -60.0f, 40.0f);
-    point1 = glm::vec3(80.0f, -50.0f, 20.0f);
-    point2 = glm::vec3(60.0f, 50.0f, -30.0f);
-    point3 = glm::vec3(45.0f, 45.0f, -20.0f);
-    pointsArray.push_back(point0);
-    pointsArray.push_back(point1);
-    pointsArray.push_back(point2);
-    pointsArray.push_back(point3);
-
-    point0 =  glm::vec3(45.0f, 45.0f, -20.0f);
-    point1 = glm::vec3(35.0f, 40.0f, -10.0f);
-    point2 = glm::vec3(40.0f, 0.0f, -10.0f);
-    point3 = glm::vec3(20.0f, 5.0f, 0.0f);
-    pointsArray.push_back(point0);
-    pointsArray.push_back(point1);
-    pointsArray.push_back(point2);
-    pointsArray.push_back(point3);
-
-    point0 =  glm::vec3(20.0f, 5.0f, 0.0f);
-    point1 = glm::vec3(5.0f, 5.0f, 0.0f);
-    point2 = glm::vec3(10.0f, 10.0f, -20.0f);
-    point3 = glm::vec3(0.0f, 15.0f, -10.0f);
-    pointsArray.push_back(point0);
-    pointsArray.push_back(point1);
-    pointsArray.push_back(point2);
-    pointsArray.push_back(point3);
-    
-    point0 =  glm::vec3(0.0f, 15.0f, -10.0f);
-    point1 = glm::vec3(-20.0f, 20.0f, -5.0f);
-    point2 = glm::vec3(-10.0f, 5.0f, 0.0f);
-    point3 = glm::vec3(-25.0f, 10.0f, -5.0f);
-    pointsArray.push_back(point0);
-    pointsArray.push_back(point1);
-    pointsArray.push_back(point2);
-    pointsArray.push_back(point3);
-    
-    point0 =  glm::vec3(-25.0f, 10.0f, -5.0f);
-    point1 = glm::vec3(-45.0f, 25.0f, -10.0f);
-    point2 = glm::vec3(-30.0f, 80.0f, -20.0f);
-    point3 = glm::vec3(-60.0f, 90.0f, -40.0f);
-    pointsArray.push_back(point0);
-    pointsArray.push_back(point1);
-    pointsArray.push_back(point2);
-    pointsArray.push_back(point3);
-    
-    point0 =  glm::vec3(-60.0f, 90.0f, -40.0f);
-    point1 = glm::vec3(-80.0f, 100.0f, 0.0f);
-    point2 = glm::vec3(-100.0f, -60.0f, 40.0f);
-    point3 = glm::vec3(-70.0f, -70.0f, 60.0f);
-    pointsArray.push_back(point0);
-    pointsArray.push_back(point1);
-    pointsArray.push_back(point2);
-    pointsArray.push_back(point3);
-
-    
-}
-
-
