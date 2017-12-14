@@ -46,6 +46,8 @@ public:
     GLuint uProjection, uModelview;
   
     glm::vec3 P0, P1, P2, P3;
+
+	int height;
     
 
     void generateCubeMesh(float w, float h);

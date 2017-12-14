@@ -21,7 +21,8 @@
 #include "BezierCurve.h"
 #include <vector>
 #include "Particle.h"
-
+#include <stack>
+#include <glm/gtx/string_cast.hpp>
 
 class Window
 {
@@ -53,7 +54,19 @@ public:
     static void initializePointsArray();
     
     static void moveCoaster(); 
-    
+
+	//L-System Plants
+	static void initializeFerns(int);
+	static void drawFerns(GLint);
+
+	static void initializePlant4s(int);
+	static void drawPlant4s(GLint);
+
+	static void initializeBranch(int);
+	static void drawBranches(GLint);
+
+	static void cleanGarden();
+
 };
 
 #endif

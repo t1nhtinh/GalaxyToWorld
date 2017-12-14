@@ -256,25 +256,24 @@ void OBJObject::draw(GLuint shaderProgram)
     
     // Now draw the object. We simply need to bind the VAO associated with it.
     glBindVertexArray(VAO);
+	matMode = 0;
     
-    glm::vec3 cam_pos(0.0f, 0.0f, 200.0f);		// e  | Position of camera
-    glUniform3f(camPos,cam_pos[0],cam_pos[1],cam_pos[2]);
-//    if(matMode == 0){
-//        renderMaterial(shaderProgram, matMode);
-//    }
-//    else if (matMode == 1)
-//    {
-//        renderMaterial(shaderProgram, matMode);
-//    }
-//    else if (matMode == 2)
-//    {
-//        renderMaterial(shaderProgram, matMode);
-//    }
-//    else if (matMode == 3) {
-//        GLuint materialAttr = glGetUniformLocation(shaderProgram, "material.mode");
-//        glUniform1i(materialAttr, matMode);
-//    }
-//    
+    if(matMode == 0){
+        renderMaterial(shaderProgram, matMode);
+    }
+    else if (matMode == 1)
+    {
+        renderMaterial(shaderProgram, matMode);
+    }
+    else if (matMode == 2)
+    {
+        renderMaterial(shaderProgram, matMode);
+    }
+    else if (matMode == 3) {
+        GLuint materialAttr = glGetUniformLocation(shaderProgram, "material.mode");
+        glUniform1i(materialAttr, matMode);
+    }
+    
     // Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     // Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
@@ -284,7 +283,6 @@ void OBJObject::draw(GLuint shaderProgram)
 
 void OBJObject::drawSphere(GLuint shaderProgram)
 {
-    
     // Calculate the combination of the model and view (camera inverse) matrices
     glm::mat4 modelview = Window::V * toWorld;
     
@@ -292,33 +290,22 @@ void OBJObject::drawSphere(GLuint shaderProgram)
     // Consequently, we need to forward the projection, view, and model matrices to the shader programs
     // Get the location of the uniform variables "projection" and "modelview"
     uProjection = glGetUniformLocation(shaderProgram, "projection");
-    //uModelview = glGetUniformLocation(shaderProgram, "modelview");
     view = glGetUniformLocation(shaderProgram, "view");
     model = glGetUniformLocation(shaderProgram, "model");
-//
-     GLuint camPos = glGetUniformLocation(shaderProgram, "camPos");
-    // Now send these values to the shader program
+    GLuint camPos = glGetUniformLocation(shaderProgram, "camPos");
+	GLuint uColor = glGetUniformLocation(shaderProgram, "col");
+
     glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
-    //glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
     glUniformMatrix4fv(view, 1, GL_FALSE, &Window::V[0][0]);
     glUniformMatrix4fv(model, 1, GL_FALSE, &toWorld[0][0]);
 
+	glm::vec3 color = glm::vec3(0.125f, 0.698f, 0.667f);
+	glUniform3f(uColor, color[0], color[1], color[2]);
     glm::vec3 cam_pos(0.0f, 0.0f, 200.0f);		// e  | Position of camera
     glUniform3f(camPos,cam_pos[0],cam_pos[1],cam_pos[2]);
-
+    
     // Now draw the object. We simply need to bind the VAO associated with it.
     glBindVertexArray(VAO);
-    
-//    cout << matMode << endl;
-//    if (matMode == 1)
-//    {
-//        renderMaterial(shaderProgram, matMode);
-//    }
-//    else if (matMode == 2)
-//    {
-//        renderMaterial(shaderProgram, matMode);
-//    }
-
     
     // Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -333,17 +320,18 @@ void OBJObject::drawSphere(GLuint shaderProgram)
 
 void OBJObject::spin(float deg)
 {
-    //this->angle += deg;
-   /// if (this->angle > 360.0f || this->angle < -360.0f) this->angle = 0.0f;
+
+    this->angle += deg;
+    if (this->angle > 360.0f || this->angle < -360.0f) this->angle = 0.0f;
     // This creates the matrix to rotate the OBJObject
-    this->toWorld = this->toWorld * glm::rotate(glm::mat4(1.0f), deg / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+    this->toWorld = glm::rotate(glm::mat4(1.0f), deg / 180.0f * glm::pi<float>(), glm::vec3(1.0f, -1.0f, 0.0f)) * toWorld;
 }
 
 void OBJObject::update()
 
 {
     
-    spin(1.0f);
+    spin(0.5f);
 }
 
 

@@ -22,7 +22,7 @@ ProcObj::ProcObj(){
     //****DiamondSwaure requres size 2^n + 1
     //size = 33; //n = 4
     size = 65; //n = 6
-    // size = 513; //n = 9
+//     size = 513; //n = 9
     
     // numVertices = 289; //17 x 17
     //numVertices = 1089; //33 x 33
@@ -31,20 +31,22 @@ ProcObj::ProcObj(){
     
     //startPos = 340.0; 17x20
     //startPos = 660.0; 33x20
-   // startPos = 20520; 513 x 40
-    startPos = 1300; //65 x 20
+//	 startPos = 20520;// 513 x 40
+		 startPos = 1300;// from 65
+  //  startPos = 1300; //65 x 20
     
     renderMaterial(); //Load textures for terrain
     
     initTerrain(); //initialize a 2D Terrain Map to represent a height map
     initCornerPoints(); //initialize the 4 corner points
     
-    diamondSquare(0, size - 1, 0, size - 1, 120); //generate height map
+	height = 100;
+    diamondSquare(0, size - 1, 0, size - 1, height); //generate height map
     generateMesh(); //generate mesh with height map values
     loadArray(); //load vertices, indices, normals from mesh into Vertex array and send to shader
     
-    cout << vertices.size() << endl;
-    cout << textureCoords.size() << endl;
+    //cout << vertices.size() << endl;
+    //cout << textureCoords.size() << endl;
 }
 
 void ProcObj::initTerrain(){
@@ -214,9 +216,9 @@ void ProcObj::loadArray(){
 
 void ProcObj::draw(GLuint shaderProgram){
     glEnable(GL_TEXTURE);
-//    diamondSquare(0, size - 1, 0, size - 1, 60); //get height map
-//    generateMesh(); //generate mesh with height map
-//    loadArray();
+   // diamondSquare(0, size - 1, 0, size - 1, 120); //get height map
+   // generateMesh(); //generate mesh with height map
+   // loadArray();
     
     // Calculate the combination of the model and view (camera inverse) matrices
     glm::mat4 modelview = Window::V * toWorld;
@@ -390,7 +392,7 @@ void ProcObj::renderMaterial(){
     //loops through all 6 texture targets
    // for (unsigned int i = 0; i < faces.size(); i++)
    // {
-    unsigned char *data = stbi_load("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/grass.jpg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("../texture/water2.jpg", &width, &height, &nrChannels, 0);
         if (data)
         {
             //Once glTexImage2D is called, the currently bound texture object now has the texture image attached to it.
@@ -415,7 +417,7 @@ void ProcObj::renderMaterial(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    data = stbi_load("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/water1.jpg", &width, &height, &nrChannels, 0);
+    data = stbi_load("../texture/water1.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
         
@@ -439,7 +441,7 @@ void ProcObj::renderMaterial(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    data = stbi_load("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/water2.jpg", &width, &height, &nrChannels, 0);
+    data = stbi_load("../texture/rock.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
         
@@ -463,7 +465,7 @@ void ProcObj::renderMaterial(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    data = stbi_load("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/dryland.jpg", &width, &height, &nrChannels, 0);
+    data = stbi_load("../texture/stone.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
         
@@ -487,7 +489,7 @@ void ProcObj::renderMaterial(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    data = stbi_load("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stone.jpg", &width, &height, &nrChannels, 0);
+    data = stbi_load("../texture/snow.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
         
@@ -557,8 +559,8 @@ void ProcObj::generateCubeMesh(float w, float h){
                 
 
 float ProcObj::randomNum(int min, int max){
-    int seed;
-    srand(seed);
+//    int seed = 0;
+   // srand(NULL);
     float randNum;
     
     int dif = max - min;

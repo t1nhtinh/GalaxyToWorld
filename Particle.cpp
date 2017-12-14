@@ -8,6 +8,7 @@ Particle::Particle(){
     color = glm::vec3(0.0f, 0.0f, 0.0f); //start particle to be black then turn to white
     
 }
+Particle::~Particle(){}
 
 ParticleSystem::ParticleSystem(float r, float num, int m){
     
@@ -97,7 +98,7 @@ void ParticleSystem::generate(int size, int mode){
         float spiral = radius/ (float)size; //create spiral by decrementing the radius
         circle = (glm::pi<float>() * 2.0)/ (float)size;
         for(int h = 0; h <= size+100; h++){
-            glm::vec3 vertex = glm::vec3(radius * cos(angle), radius * sin(angle), -200.0 + (float)(size - 10.0f*h)/2.0f );
+            glm::vec3 vertex = glm::vec3(radius * sin(angle),(float)(size - 10.0f*h)/2.0f, radius * cos(angle) );
             pathArray.push_back(vertex);
             angle = angle + circle;
             radius = radius - spiral;
@@ -107,8 +108,8 @@ void ParticleSystem::generate(int size, int mode){
     {
         //**generate belt path xy-plane
         //create two points
-        glm::vec3 v1 = glm::vec3(-2000.0f, 2000.0f, -2000.0f);
-        glm::vec3 v2 = glm::vec3(2000.0f,  1000.0f,  2000.0f);
+        glm::vec3 v1 = glm::vec3(-1800.0f, 1500.0f, -1900.0f);
+        glm::vec3 v2 = glm::vec3(1800.0f,  1000.0f,  1900.0f);
         pathArray.push_back(v1);
         pathArray.push_back(v2);
         //get direction between two points

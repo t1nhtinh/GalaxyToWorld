@@ -16,8 +16,6 @@ uniform mat4 projection;
 
 out vec3 Position;
 out vec3 Normal;
-
-
 // Outputs of the vertex shader are the inputs of the same name of the fragment shader.
 // The default output, gl_Position, should be assigned something. You can define as many
 // extra outputs as you need.
@@ -28,5 +26,4 @@ void main()
 	Normal = mat3(transpose(inverse(model))) * aNormal;
 	Position = vec3(model * vec4(aPos, 1.0));
     gl_Position = projection * view * model * vec4(aPos, 1.0);
-	
 }

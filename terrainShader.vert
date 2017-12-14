@@ -20,8 +20,8 @@ void main()
     //vec2 pos = normalize(aTexCoord);
    // vec2 pos = vec2(mapNorm(vec3(aTexCoord, 0)));
     
-    //TexCoord = vec2(mapNorm(normalize(aPos)).x, mapNorm(normalize(aPos)).z);
-    TexCoord = aTexCoord;
+    TexCoord = vec2(mapNorm(normalize(aPos)).x, mapNorm(normalize(aPos)).z);
+   // TexCoord = aTexCoord;
     
 
     //TexCoord = vec2(0.0, 1.0);
