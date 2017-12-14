@@ -143,12 +143,12 @@ void Window::initialize_objects()
     
     //Construct sphere for anchor control points and approximating control points
     anchorPtr = new Geode();
-    anchorPtr->spherePtr = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/quadSphere.obj");
+    anchorPtr->spherePtr = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
     anchorPtr->isSphere = true;
     anchorPtr->spherePtr->matMode = 1; //Color control/anchor points red
     
     approxControlPtr = new Geode();
-    approxControlPtr->spherePtr = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/quadSphere.obj");
+    approxControlPtr->spherePtr = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
     approxControlPtr->isSphere = true;
     approxControlPtr->spherePtr->matMode = 2; //Color approximating control points green
     

@@ -168,7 +168,7 @@ void OBJObject::parse(const char *filepath)
     
         }
         
-        if (c1 == 'v' && c2 == ' ')
+        else if (c1 == 'v' && c2 == ' ')
         {
             //fscanf() reads data from the stream and stores them according to the parameter format into the locations pointed by the additional arguments
             fscanf(fp, "%f %f %f %f %f %f", &x, &y, &z, &r, &g, &b);
@@ -222,11 +222,11 @@ void OBJObject::parse(const char *filepath)
     //close file when done
     fclose(fp);
 // 
-//    cout << "Finished parsing..." << endl;
-//        cout << "size of vectors.. " << vertices.size() << endl;
-//        cout << "size of vnormals.. " << normals.size() << endl;
-//        cout << "size of indices.. " << indices.size() << endl;
-//
+    cout << "Finished parsing..." << endl;
+        cout << "size of vectors.. " << vertices.size() << endl;
+        cout << "size of vnormals.. " << normals.size() << endl;
+        cout << "size of indices.. " << indices.size() << endl;
+
     
     findCenter(); //center!
     
