@@ -97,23 +97,23 @@ void Window::initialize_objects()
     objectPtr = coaster;
     objectPtr->matMode = 0;
 
-	initializeFerns(3);
+	initializeFerns(6);
 	fernGrowth = 1;
-	initializePlant4s(3);
+	initializePlant4s(6);
 	plant4Growth = 1;
-	initializeBranch(3);
+	initializeBranch(6);
 	branchGrowth = 1;
 
 	//Initialize the sun
 	sunSphere = new OBJObject("sphere.obj");
-	sun = glm::vec3(glm::vec3(-25, 13, 150));
+	sun = glm::vec3(glm::vec3(415, 317, 438));
 	sunSphere->toWorld[3] = glm::vec4(sun,1.0f);
 	tZ = false;// switch for control over camera or sun
 }
 
 void Window::initializeBranch(int n) {
 	//Branch style plants setup 
-	branch = new Plant(5,2.0f);
+	branch = new Plant(5,10.0f);
 
 	for (int i = 0; i < n; i++) {
 		PlantTransform * p = new PlantTransform("branch", objectPtr->toWorld);
@@ -130,28 +130,95 @@ void Window::drawBranches(GLint shader) {
 
 	glm::mat4 tempWorld = glm::scale(glm::mat4(1), glm::vec3(1.0f / 50.0f)) * objectPtr->toWorld;
 	glm::mat4 inverseRotateWorld = glm::transpose(tempWorld);
+	float yOffset;
+	glm::mat4 scaleMat;
 
-	float rot_on_sphere = 0;
-	float tran_on_sphere = 0;
-	for (int i = 0; i < branches.size(); i++) {
-		rot_on_sphere += 5.0f;
-		tran_on_sphere += 5.0f;
-		if (rot_on_sphere > 90.0f) {
-			rot_on_sphere = 0.0f;
+	if (branchGrowth - 1 < 2) {
+	//	cout << "Inside: " << plant4Growth << endl;
+		scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0/5.0f));
+		yOffset = 200.0f;
+	}
+		else if (branchGrowth - 1 == 2) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 5.0f));
+			yOffset = 200.0f;
+		}
+		else if (branchGrowth - 1 == 3) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 7.0f));
+			yOffset = 305.0f;
+		}
+		else if (branchGrowth - 1 == 4) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 9.0f));
+			yOffset = 407.0f;
+		}
+		else if (branchGrowth - 1 == 5) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 11.0f));
+			yOffset = 500.0f;
 		}
 
-		tempWorld = glm::rotate(glm::mat4(1.0f), 
-			glm::radians(rot_on_sphere), glm::vec3(0, 0, 1))
-			*  inverseRotateWorld;
-		tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
-			glm::vec3(tran_on_sphere,0,0));
-		branches[i]->draw(shader, tempWorld);
-	}
+	float rot_on_sphere = -60;
+	float tran_on_sphere = 0;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(0, 0, 1))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(0, yOffset, 0));
+	branches[0]->draw(shader,scaleMat * tempWorld);
+
+	rot_on_sphere = -30;
+	tran_on_sphere = -10;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(0, 0, 1))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(0,yOffset,tran_on_sphere));
+	branches[1]->draw(shader,scaleMat * tempWorld);
+
+	rot_on_sphere = 10;
+	tran_on_sphere = -30;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(0, 0, 1))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(0,yOffset,tran_on_sphere));
+	branches[2]->draw(shader,scaleMat * tempWorld);
+
+	rot_on_sphere = 50;
+	tran_on_sphere = -20;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(0, 0, 1))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(0,yOffset,tran_on_sphere));
+	branches[3]->draw(shader,scaleMat * tempWorld);
+
+	rot_on_sphere = -100;
+	tran_on_sphere = 0;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(0, 0, 1))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(0, yOffset, 0));
+	branches[4]->draw(shader,scaleMat * tempWorld);
+
+	rot_on_sphere = 80;
+	tran_on_sphere = -10;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(0, 0, 1))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(0,yOffset,tran_on_sphere));
+	branches[5]->draw(shader,scaleMat * tempWorld);
 }
 
 void Window::initializePlant4s(int n) {
 	//Plant 4 style plants setup 
-	plant4 = new Plant(5,2.0f);
+	plant4 = new Plant(5,10.0f);
 
 	for (int i = 0; i < n; i++) {
 		PlantTransform * p = new PlantTransform("plant4 ", objectPtr->toWorld);
@@ -167,30 +234,99 @@ void Window::drawPlant4s(GLint shader) {
 	glUniform3f(uLightPos, sun[0], sun[1], sun[2]);
 	glm::mat4 tempWorld = glm::scale(glm::mat4(1), glm::vec3(1.0f / 50.0f)) * objectPtr->toWorld;
 	glm::mat4 inverseRotateWorld = glm::transpose(tempWorld);
+	float yOffset;
+	glm::mat4 scaleMat;
+
+	//cout << "drawing plant with : " << plant4Growth << endl;
+	if (plant4Growth - 1 < 2) {
+	//	cout << "Inside: " << plant4Growth << endl;
+		scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0/8.0f));
+		yOffset = 360.0f;
+	}
+		else if (plant4Growth - 1 == 2) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 8.0f));
+			yOffset = 360.0f;
+		}
+		else if (plant4Growth - 1 == 3) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 12.0f));
+			yOffset = 567.0f;
+		}
+		else if (plant4Growth - 1 == 4) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 16.0f));
+			yOffset = 774.0f;
+		}
+		else if (plant4Growth - 1 == 5) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 20.0f));
+			yOffset = 978.0f;
+		}
+
 
 	//plant4s[0]->draw(shader, tempWorld);
 
-	float rot_on_sphere = 0;
+	float rot_on_sphere = 60;
 	float tran_on_sphere = 0;
-	for (int i = 0; i < plant4s.size(); i++) {
-		rot_on_sphere += 5.0f;
-		tran_on_sphere += 0.2f;
-		if (rot_on_sphere > 90.0f) {
-			rot_on_sphere = 0.0f;
-		}
 
-		tempWorld = glm::rotate(glm::mat4(1.0f), 
-			glm::radians(rot_on_sphere), glm::vec3(1, 0, 0))
-			*  inverseRotateWorld;
-		tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
-			glm::vec3(tran_on_sphere,0,0));
-		plant4s[i]->draw(shader, tempWorld);
-	}
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 10, 0));
+	plant4s[0]->draw(shader, scaleMat * tempWorld);
+
+	rot_on_sphere = 30;
+	tran_on_sphere = -90;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 20, 0));
+	plant4s[1]->draw(shader, scaleMat * tempWorld);
+
+	rot_on_sphere = 80;
+	tran_on_sphere = -100;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 25, 0));
+	plant4s[2]->draw(shader, scaleMat * tempWorld);
+
+	rot_on_sphere = 100;
+	tran_on_sphere = 0;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 10, 0));
+	plant4s[3]->draw(shader, scaleMat * tempWorld);
+
+	rot_on_sphere = 120;
+	tran_on_sphere = 100;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 20, 0));
+	plant4s[4]->draw(shader, scaleMat * tempWorld);
+
+	rot_on_sphere = 140;
+	tran_on_sphere = -20;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 10, 0));
+	plant4s[5]->draw(shader, scaleMat * tempWorld);
 }
 
 void Window::initializeFerns(int n) {
 	//Ferns style plants setup 
-	fern = new Plant(25,2.0f);
+	fern = new Plant(25,10.0f);
 	fern->setupRuleSets();
 
 	for (int i = 0; i < n; i++) {
@@ -209,23 +345,91 @@ void Window::drawFerns(GLint shader) {
 	glm::mat4 tempWorld = glm::scale(glm::mat4(1), glm::vec3(1.0f / 50.0f)) * objectPtr->toWorld;
 	glm::mat4 inverseRotateWorld = glm::transpose(tempWorld);
 
-	float rot_on_sphere = 0;
-	float tran_on_sphere = 0;
-	for (int i = 0; i < ferns.size(); i++) {
-		rot_on_sphere += 5.0f;
-		tran_on_sphere += 0.1f;
-		if (rot_on_sphere > 90.0f) {
-			rot_on_sphere = 0.0f;
+	float yOffset;
+	glm::mat4 scaleMat;
+
+	//cout << "drawing plant with : " << fernGrowth << endl;
+	if (fernGrowth - 1 < 2) {
+	//	cout << "Inside: " << fernGrowth << endl;
+		scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0/8.0f));
+		yOffset = 360.0f;
+	}
+		else if (fernGrowth - 1 == 2) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 8.0f));
+			yOffset = 360.0f;
+		}
+		else if (fernGrowth - 1 == 3) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 12.0f));
+			yOffset = 567.0f;
+		}
+		else if (fernGrowth - 1 == 4) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 16.0f));
+			yOffset = 774.0f;
+		}
+		else if (fernGrowth - 1 == 5) {
+			scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / 20.0f));
+			yOffset = 978.0f;
 		}
 
-		tempWorld = glm::rotate(glm::mat4(1.0f), 
-			glm::radians(rot_on_sphere), glm::vec3(-1, 0, 0))
-			*  inverseRotateWorld;
-		tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
-			glm::vec3(tran_on_sphere,0,0));
-		ferns[i]->draw(shader, tempWorld);
-	}
-		
+	float rot_on_sphere = 60;
+	float tran_on_sphere = 0;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(-1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 10, 0));
+	ferns[0]->draw(shader, scaleMat * tempWorld);
+
+	rot_on_sphere = 30;
+	tran_on_sphere = -90;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(-1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 20, 0));
+	ferns[1]->draw(shader, scaleMat * tempWorld);
+
+	rot_on_sphere = 80;
+	tran_on_sphere = -100;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(-1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 25, 0));
+	ferns[2]->draw(shader, scaleMat * tempWorld);
+
+	rot_on_sphere = 100;
+	tran_on_sphere = 0;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(-1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 10, 0));
+	ferns[3]->draw(shader, scaleMat * tempWorld);
+
+	rot_on_sphere = 120;
+	tran_on_sphere = 100;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(-1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 20, 0));
+	ferns[4]->draw(shader, scaleMat * tempWorld);
+
+	rot_on_sphere = 140;
+	tran_on_sphere = -20;
+
+	tempWorld = glm::rotate(glm::mat4(1.0f),
+		glm::radians(rot_on_sphere), glm::vec3(-1, 0, 0))
+		*  inverseRotateWorld;
+	tempWorld = glm::transpose(tempWorld) * glm::translate(glm::mat4(1.0f),
+		glm::vec3(tran_on_sphere, yOffset - 10, 0));
+	ferns[5]->draw(shader, scaleMat * tempWorld);
 }
 
 void Window::cleanGarden() {
@@ -318,24 +522,41 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
     //moveCoaster();
+
 	objectPtr->update();
-	if (plant4Growth > 4) {
-		plant4Growth = 1;
-	}
-	if (branchGrowth > 4) {
-		branchGrowth = 1;
-	}
-	if (fernGrowth > 4) {
-		fernGrowth = 1;
-	}
 	if (objectPtr->angle == 270.0f) {
+
+		if (plant4Growth > 4) {
+			plant4Growth = 1;
+		}
+
 		plant4s[0]->loadPlant(plant4Growth, 1);
-		branches[0]->loadPlant(branchGrowth, 2);
-		ferns[0]->loadPlant(fernGrowth, 0);
 
 		plant4Growth++;
-		branchGrowth++;
+	}
+
+	else if (objectPtr->angle == 290.0f) {
+
+		if (fernGrowth > 4) {
+			fernGrowth = 1;
+		}
+
+		ferns[0]->loadPlant(fernGrowth, 0);
+
 		fernGrowth++;
+
+	}
+
+	else if (objectPtr->angle == 340.0f) {
+
+		if (branchGrowth > 4) {
+			branchGrowth = 1;
+		}
+
+		branches[0]->loadPlant(branchGrowth, 2);
+
+		branchGrowth++;
+
 	}
 }
 
@@ -400,6 +621,30 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
             coaster->translateMode = true;
 			coaster->translateX(-5);
         }
+		else if (key == GLFW_KEY_G) {
+
+
+		if (plant4Growth > 5) {
+			plant4Growth = 1;
+		}
+		if (branchGrowth > 5) {
+			branchGrowth = 1;
+		}
+		if (fernGrowth > 5) {
+			fernGrowth = 1;
+		}
+
+		cout << plant4Growth << endl;
+		plant4s[0]->loadPlant(plant4Growth, 1);
+		branches[0]->loadPlant(branchGrowth, 2);
+		ferns[0]->loadPlant(fernGrowth, 0);
+
+		plant4Growth++;
+		branchGrowth++;
+		fernGrowth++;
+
+		}
+
 	}
     
 }

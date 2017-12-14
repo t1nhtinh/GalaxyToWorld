@@ -27,7 +27,7 @@ void main()
   vec3 lightPos = lightPosInput; 
 
   vec3 diff = diffuse( Normal, Position, lightPos);
-  vec3 spek = specular(camPos,Position,normalize(lightPos - Position),Normal);
+  vec3 spek = specular(lightPos,Position,normalize(lightPos - Position),Normal);
   vec3 edgeLighting = outlineEdge();
   vec3 amb = ambient();
  FragColor = vec4(edgeLighting * ( diff + spek + amb), 1.0f);
