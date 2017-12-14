@@ -15,12 +15,12 @@ Light::Light(int mode)
     }
     //point lighting
     else if (mode == 1) {
-        parse("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/Project4_RollerCoaster/Project4_RollerCoaster/sphere.obj");
+        //parse("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/Project4_RollerCoaster/Project4_RollerCoaster/sphere.obj");
 
     }
     //spot light
     else if (mode == 2) {
-        parse("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/Project4_RollerCoaster/Project4_RollerCoaster/sphere.obj");
+       // parse("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/Project4_RollerCoaster/Project4_RollerCoaster/sphere.obj");
 
     }
 

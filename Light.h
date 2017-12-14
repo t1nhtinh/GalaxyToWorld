@@ -23,7 +23,6 @@ class Light{
         //int mode;
         void draw(GLuint shaderProgram);
         void parse(const char *filepath); 
-    //void rotate(glm::vec3 rot_axis, float rot_angle);
         int lightMode;
         
         glm::vec3 color;

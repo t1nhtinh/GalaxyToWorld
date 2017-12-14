@@ -20,6 +20,7 @@
 #include "Light.h"
 #include "BezierCurve.h"
 #include <vector>
+#include "Particle.h"
 
 
 class Window

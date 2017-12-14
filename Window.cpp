@@ -2,11 +2,14 @@
 #include "Node.h"
 #include "MatrixTransform.h"
 #include "Geode.h"
+#include "ProcObj.h"
 #include <time.h>
 
-const char* window_title = "GLFW Starter Project";
+const char* window_title = "Galaxy";
 Cube * cube;
+Cube * cubeSphere;
 GLint shaderProgram, skyboxShaderProgram, curveShaderProgram, selectionShaderProgram;
+GLint particleShaderProgram, envShaderProgram, terrainShader;
 
 
 OBJObject * objectPtr;
@@ -25,7 +28,6 @@ MatrixTransform * coasterMtx;
 Geode * curvePtr;
 Geode * anchorPtr;
 Geode * approxControlPtr;
-//Geode * handlePtr;
 Geode * coasterPtr;
 
 BezierCurve * handlePtr;
@@ -45,6 +47,15 @@ BezierCurve * handlePtr;
 #define VERTEX_SELECTIONSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/selection.vert"
 #define FRAGMENT_SELECTIONSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/selection.frag"
 
+#define VERTEX_PARTICLESHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/particleShader.vert"
+#define FRAGMENT_PARTICLESHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/particleShader.frag"
+
+#define VERTEX_ENVSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/environmentshader.vert"
+#define FRAGMENT_ENVSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/environmentshader.frag"
+
+#define VERTEX_TERRAINSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/terrainShader.vert"
+#define FRAGMENT_TERRAINSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/terrainShader.frag"
+
 //Lighting
 Light * light_ptr;
 Light * dir_light;
@@ -52,7 +63,7 @@ Light * point_light;
 Light * spot_light;
 
 // Default camera parameters
-glm::vec3 cam_pos(0.0f, 0.0f, 200.0f);		// e  | Position of camera
+glm::vec3 cam_pos(0.0f, 200.0f, 800.0f);		// e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
 glm::vec3 prev_position;
@@ -74,6 +85,12 @@ vector<BezierCurve*> bezierCurveArray;
 vector<OBJObject*> sphereArray;
 vector<MatrixTransform*> sphereMtxArray;
 
+ParticleSystem* beltPtr;
+ParticleSystem* ringPtr;
+ParticleSystem* spiralPtr;
+
+ProcObj* procObj;
+
 
 int curveCount = 0; //8 curves
 int lineCount = 0; //150 line segments per curve
@@ -88,6 +105,9 @@ glm::vec3 start; //position coaster at the highest point
 float deltaH = 0.0; //max height of track - current height of sphere
 float currH = 0.0;
 int id;
+
+int particleTimer = 0;
+
 void Window::initialize_objects()
 {
     dir_light = new Light(0);
@@ -101,7 +121,9 @@ void Window::initialize_objects()
     skyboxShaderProgram = LoadShaders(VERTEX_SKYBOXSHADER, FRAGMENT_SKYBOXSHADER);
     curveShaderProgram = LoadShaders(VERTEX_CURVESHADER, FRAGMENT_CURVESHADER);
     selectionShaderProgram = LoadShaders(VERTEX_SELECTIONSHADER, FRAGMENT_SELECTIONSHADER);
-    
+    particleShaderProgram = LoadShaders(VERTEX_PARTICLESHADER, FRAGMENT_PARTICLESHADER);
+    envShaderProgram = LoadShaders(VERTEX_ENVSHADER, FRAGMENT_ENVSHADER);
+    terrainShader = LoadShaders(VERTEX_TERRAINSHADER, FRAGMENT_TERRAINSHADER);
     
     light_ptr = dir_light;
     light_ptr->lightMode = 0;
@@ -121,12 +143,12 @@ void Window::initialize_objects()
     
     //Construct sphere for anchor control points and approximating control points
     anchorPtr = new Geode();
-    anchorPtr->spherePtr = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
+    anchorPtr->spherePtr = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/quadSphere.obj");
     anchorPtr->isSphere = true;
     anchorPtr->spherePtr->matMode = 1; //Color control/anchor points red
     
     approxControlPtr = new Geode();
-    approxControlPtr->spherePtr = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
+    approxControlPtr->spherePtr = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/quadSphere.obj");
     approxControlPtr->isSphere = true;
     approxControlPtr->spherePtr->matMode = 2; //Color approximating control points green
     
@@ -201,30 +223,34 @@ void Window::initialize_objects()
         
         pathArray.push_back(curvePtr->bezierCurve->vertices); //Grab the path
     
+        
     }
-
-    //iterate through path and store max height
-    for(int j = 0; j < pathArray.size(); j++){
-        for (int k = 0; k < pathArray[j].size(); k++){
-            if(maxH < pathArray[j][k].y){
-                maxH = pathArray[j][k].y;
-                start = pathArray[j][k];
-                
-                //Set the starting position of the roller coaster at highest point
-                startCurve = curveCount = j;
-                startLine = lineCount = k;
-            }
-        }
-    }
-    
+  
     //Create the roller coaster using a sphere
     coaster = new OBJObject ("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
     
-    glm::mat4 scaleCoaster = glm::scale((glm::mat4(1.0f), glm::vec3(5.0f)));
+    float rad = coaster->maxX;
+    cout << "radius is  "<< rad << endl;
+    glm::mat4 scaleCoaster = glm::scale((glm::mat4(1.0f), glm::vec3(100.0f)));
     coaster->toWorld = scaleCoaster * coaster->toWorld;
-    coaster->toWorld[3] = glm::vec4(start, 1.0f);
-    
+    coaster->toWorld[3] = glm::vec4(cam_look_at,1.0f);
+    rad = rad * 50.0f;
     objectPtr = coaster;
+    objectPtr->matMode = 0;
+    
+    
+    cubeSphere = new Cube();
+    cubeSphere->toWorld = glm::scale((glm::mat4(1.0f), glm::vec3(0.5f))) * cubeSphere->toWorld;
+    cubeSphere->toWorld = glm::scale((glm::mat4(1.0f), glm::vec3(rad))) * cubeSphere->toWorld;
+    
+    
+    //spiralPtr = new ParticleSystem(50.0f, 1000.0f, 0);
+    beltPtr = new ParticleSystem(800.0f, 1000.0f, 1);
+    ringPtr = new ParticleSystem(50.0f, 1000.0f, 2);
+    //particlePtr->toWorld[3] = glm::vec4(100.0f);
+    
+    procObj = new ProcObj();
+    procObj->toWorld = glm::translate(glm::mat4(), glm::vec3(0.0f, -1000.0f, -1000.0f)) *  procObj->toWorld;
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -299,7 +325,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 	if (height > 0)
 	{
-		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 3000.0f);
+		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 5000.0f);
         V = glm::lookAt(cam_pos, cam_look_at, cam_up);
         
 	}
@@ -308,6 +334,17 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
     //moveCoaster();
+    
+    particleTimer++;
+    
+    //if((particleTimer % 10) == 0){
+    //spiralPtr->update(1.0f);
+    beltPtr->update(1.0f);
+         ringPtr->update(1.0f);
+    
+        particleTimer = 0; 
+    //}
+   
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -318,23 +355,33 @@ void Window::display_callback(GLFWwindow* window)
     
   
     // Use the shader of programID
-	//glUseProgram(shaderProgram);
+    //glUseProgram(shaderProgram);
+     glUseProgram(envShaderProgram);
+     coaster->draw(envShaderProgram);
+    //coaster->drawSphere(envShaderProgram);
+    //coaster->drawSphere(shaderProgram);
     
-    //objectPtr->drawSpere(shaderProgram);
+    //cubeSphere->draw(shaderProgram);
+    //objectPtr->drawSphere(shaderProgram);
     
+     glUseProgram(terrainShader);
+     procObj->draw(terrainShader);
     
-//    light_ptr->draw(shaderProgram);
+    // light_ptr->draw(shaderProgram);
     // Render the cube
-//	//cube->draw(shaderProgram);
+	//cube->draw(shaderProgram);
     glUseProgram(skyboxShaderProgram);
-    
     cube->drawSkybox(skyboxShaderProgram);
    
-    GLuint camPos = glGetUniformLocation(skyboxShaderProgram, "cameraPos");
-    glUniform3fv(camPos, 1, &cam_pos[0]);
+    //objectPtr->draw(shaderProgram);
     
-    coaster->draw(skyboxShaderProgram);
-
+//   GLuint camPos = glGetUniformLocation(skyboxShaderProgram, "cameraPos");
+//   glUniform3fv(camPos, 1, &cam_pos[0]);
+ 
+    glUseProgram(particleShaderProgram);
+    //spiralPtr->render(particleShaderProgram);
+    //beltPtr->render(particleShaderProgram);
+    //ringPtr->render(particleShaderProgram);
     
     //Draw roller Coaster
    // glUseProgram(curveShaderProgram);
@@ -407,6 +454,10 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
             coaster->physiceMode = true;
         
         }
+        else if (key == GLFW_KEY_M)
+        {
+
+        }
     
 
 
@@ -448,10 +499,8 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
         glReadPixels((GLint)curr_x*2, (GLint)(height - curr_y*2), 1,1,GL_RGBA, GL_UNSIGNED_BYTE, &pix);
             
         id = (int)pix[0] - 1;
-        
     
-        
-        cout << id << " sphere selected" << endl;
+       // cout << id << " sphere selected" << endl;
  
     }
     //Translation in the x-y plane
@@ -521,89 +570,89 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
     auto translateX = translate_distance.x;
     auto translateY = translate_distance.y;
     
-    if(selectionPtr->selectionMode == true){
-        
-        if(id >= 0 ){
-            int dup_0 = id/4;
-            int dup_1 = id % 4;
-            
-            //    P3 (or Q0) = (P2 + Q1) / 2
-            //    If P3/Q0 gets moved, move P2 and Q1 the same amount
-            //    If P2 gets moved, keep P3/Q0 in place and move Q1 by the negative amount
-            //    Do the same thing to P2 if Q1 gets moved
-
-            if(id == 0 || id == 31){
-                pointsArray[0].x = pointsArray[0].x - translateX;
-                pointsArray[0].y = pointsArray[0].y + translateY;
-                
-                pointsArray[31].x = pointsArray[31].x - translateX;
-                pointsArray[31].y = pointsArray[31].y + translateY;
-                
-                pointsArray[30].x = pointsArray[30].x - translateX;
-                pointsArray[30].y = pointsArray[30].y + translateY;
-                
-                pointsArray[1].x = pointsArray[1].x - translateX;
-                pointsArray[1].y = pointsArray[1].y + translateY;
-
-                
-            }
-            else if(id % 4 == 0 ){
-                pointsArray[id].x = pointsArray[id].x - translateX;
-                pointsArray[id].y = pointsArray[id].y + translateY;
-                
-                pointsArray[id - 1].x = pointsArray[id - 1].x - translateX;
-                pointsArray[id - 1].y = pointsArray[id - 1].y + translateY;
-                
-              
-
-            }
-            else if ((id + 1) % 4 == 0){
-                pointsArray[id].x = pointsArray[id].x - translateX;
-                pointsArray[id].y = pointsArray[id].y + translateY;
-                
-                pointsArray[id + 1].x = pointsArray[id + 1].x - translateX;
-                pointsArray[id + 1].y = pointsArray[id + 1].y + translateY;
-
-            }
-            else {
-            
-                pointsArray[id].x = pointsArray[id].x - translateX;
-                pointsArray[id].y = pointsArray[id].y + translateY;
-            }
-            
-            cout << id << " idddddd" << endl;
-            //cout << translateY << " Translate of Y" << endl;
-            // cout << translateX << " Translate of X" << endl;
-
-           // cout << pointsArray[id].x << " " << pointsArray[id].y << endl;
-            
-            int P0 = 0;
-            int P1 = 1;
-            int P2 = 2;
-            int P3 = 3;
-
-            pathArray.clear();
-            for(int k = 0; k < 8; k++){
-                bezierCurveArray[k]->computeVertices(pointsArray[P0], pointsArray[P1],pointsArray[P2], pointsArray[P3]);
-                sphereMtxArray[P0]->MT[3] = glm::vec4(pointsArray[P0], 1.0f);
-                sphereMtxArray[P1]->MT[3] = glm::vec4(pointsArray[P1], 1.0f);
-                sphereMtxArray[P2]->MT[3] = glm::vec4(pointsArray[P2], 1.0f);
-                sphereMtxArray[P3]->MT[3] = glm::vec4(pointsArray[P3], 1.0f);
-
-                P0 += 4;
-                P1 += 4;
-                P2 += 4;
-                P3 += 4;
-                
-                pathArray.push_back(bezierCurveArray[k]->vertices);
-            }
-            
-            
-            handlePtr->initHandlePoints(pointsArray);
-        }
-        
-        prev_position = curr_position;
-    }
+//    if(selectionPtr->selectionMode == true){
+//        
+//        if(id >= 0 ){
+//            int dup_0 = id/4;
+//            int dup_1 = id % 4;
+//            
+//            //    P3 (or Q0) = (P2 + Q1) / 2
+//            //    If P3/Q0 gets moved, move P2 and Q1 the same amount
+//            //    If P2 gets moved, keep P3/Q0 in place and move Q1 by the negative amount
+//            //    Do the same thing to P2 if Q1 gets moved
+//
+//            if(id == 0 || id == 31){
+//                pointsArray[0].x = pointsArray[0].x - translateX;
+//                pointsArray[0].y = pointsArray[0].y + translateY;
+//                
+//                pointsArray[31].x = pointsArray[31].x - translateX;
+//                pointsArray[31].y = pointsArray[31].y + translateY;
+//                
+//                pointsArray[30].x = pointsArray[30].x - translateX;
+//                pointsArray[30].y = pointsArray[30].y + translateY;
+//                
+//                pointsArray[1].x = pointsArray[1].x - translateX;
+//                pointsArray[1].y = pointsArray[1].y + translateY;
+//
+//                
+//            }
+//            else if(id % 4 == 0 ){
+//                pointsArray[id].x = pointsArray[id].x - translateX;
+//                pointsArray[id].y = pointsArray[id].y + translateY;
+//                
+//                pointsArray[id - 1].x = pointsArray[id - 1].x - translateX;
+//                pointsArray[id - 1].y = pointsArray[id - 1].y + translateY;
+//                
+//              
+//
+//            }
+//            else if ((id + 1) % 4 == 0){
+//                pointsArray[id].x = pointsArray[id].x - translateX;
+//                pointsArray[id].y = pointsArray[id].y + translateY;
+//                
+//                pointsArray[id + 1].x = pointsArray[id + 1].x - translateX;
+//                pointsArray[id + 1].y = pointsArray[id + 1].y + translateY;
+//
+//            }
+//            else {
+//            
+//                pointsArray[id].x = pointsArray[id].x - translateX;
+//                pointsArray[id].y = pointsArray[id].y + translateY;
+//            }
+//            
+//            cout << id << " idddddd" << endl;
+//            //cout << translateY << " Translate of Y" << endl;
+//            // cout << translateX << " Translate of X" << endl;
+//
+//           // cout << pointsArray[id].x << " " << pointsArray[id].y << endl;
+//            
+//            int P0 = 0;
+//            int P1 = 1;
+//            int P2 = 2;
+//            int P3 = 3;
+//
+//            pathArray.clear();
+//            for(int k = 0; k < 8; k++){
+//                bezierCurveArray[k]->computeVertices(pointsArray[P0], pointsArray[P1],pointsArray[P2], pointsArray[P3]);
+//                sphereMtxArray[P0]->MT[3] = glm::vec4(pointsArray[P0], 1.0f);
+//                sphereMtxArray[P1]->MT[3] = glm::vec4(pointsArray[P1], 1.0f);
+//                sphereMtxArray[P2]->MT[3] = glm::vec4(pointsArray[P2], 1.0f);
+//                sphereMtxArray[P3]->MT[3] = glm::vec4(pointsArray[P3], 1.0f);
+//
+//                P0 += 4;
+//                P1 += 4;
+//                P2 += 4;
+//                P3 += 4;
+//                
+//                pathArray.push_back(bezierCurveArray[k]->vertices);
+//            }
+//            
+//            
+//            handlePtr->initHandlePoints(pointsArray);
+//        }
+//        
+//        prev_position = curr_position;
+//    }
     
     //set prev_pos = curr_pos
     ///prev_position = curr_position;

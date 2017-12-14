@@ -37,7 +37,7 @@ void Geode::draw(GLuint program, glm::mat4 M){
     //draw the object file AKA render object
     if(isSphere){
         spherePtr->toWorld = MT;
-        spherePtr->drawSpere(program);
+        spherePtr->drawSphere(program);
         
     }
     

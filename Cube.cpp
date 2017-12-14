@@ -25,7 +25,7 @@ Cube::Cube()
     images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_rt.tga");
     images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_lf.tga");
     
-    
+    cubemapTexture = loadCubemap(images);
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -64,6 +64,7 @@ Cube::Cube()
     
     
     //skybox VAO
+   
     glGenVertexArrays(1, &skyboxVAO);
     glGenBuffers(1, &skyboxVBO);
     glBindVertexArray(skyboxVAO);
@@ -128,20 +129,18 @@ void Cube::drawSkybox(GLuint shaderProgram)
     
   
     //draw skybox as last
-    glDepthFunc(GL_LEQUAL);
     // change depth function so depth test passes when values are equal to depth buffer's content
     // skybox cube
     glBindVertexArray(skyboxVAO);
     glActiveTexture(GL_TEXTURE0);
-    
-    unsigned int cubemapTexture = loadCubemap(images);
+
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     
     //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    glDepthFunc(GL_LESS); // set depth function back to default
+    //glDepthFunc(GL_LESS); // set depth function back to default
 }
 
 

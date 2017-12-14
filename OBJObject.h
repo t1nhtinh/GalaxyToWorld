@@ -49,7 +49,7 @@ public:
 
 	void parse(const char* filepath);
 	void draw(GLuint);
-    void drawSpere(GLuint shaderProgram);
+    void drawSphere(GLuint shaderProgram);
     void update(); //update used for spinning
     void spin(float);
     void renderMaterial(GLuint shaderProgram, int); //render material

@@ -184,13 +184,7 @@ void BezierCurve::drawCurve(GLuint shaderProgram){
     
     glBindVertexArray(handlePointVAO);
     
-   
-    mat.mode = 0;
-    mat.color = glm::vec3(0.628281, 0.555802, 0.366065);
-//
-//    //The third object should have significant diffuse and specular reflection components.
-//    
-//    GLuint materialAttr = glGetUniformLocation(shaderProgram, "material.color");
+
     glUniform3fv(materialAttr, 1, &(mat.color)[0]);
     
     materialAttr = glGetUniformLocation(shaderProgram, "material.mode");
@@ -210,65 +204,11 @@ void BezierCurve::drawCurve(GLuint shaderProgram){
 //return an array of handle points
 vector<glm::vec3> BezierCurve::initHandlePoints(vector<glm::vec3> pointsArray){
    
-    //    Simple solution: Let’s make P3/Q0 the midpoint of P2Q1!
-    //    P3 (or Q0) = (P2 + Q1) / 2
-    //    If P3/Q0 gets moved, move P2 and Q1 the same amount
-    //    If P2 gets moved, keep P3/Q0 in place and move Q1 by the negative amount
-    //    Do the same thing to P2 if Q1 gets moved
-   // handlePointsArray = pointsArray;
+
     handlePointsArray.clear();
-     //store handle points into handle point array
-    for (int i = 0; i < 11; i++){
-        glm::vec3 midpoint, prev, next;
- 
-        //Edge case when i = 0
-        if(i == 0){
-            continue;
-        }
-        
-        else {
-          
-//            handlePointsArray.push_back(pointsArray[3*i - 1]);
-//            handlePointsArray.push_back(pointsArray[3*i + 1]);
-            
-//            midpoint = (pointsArray[3*i - 1] + pointsArray[3*i + 1])/2.0f;
-//            handlePointsArray[3*i] = midpoint;
-//            
-//            prev = (2.0f*pointsArray[3*i]) - pointsArray[3*i + 1];
-//            handlePointsArray[3*i - 1] = prev;
-//            
-//            next = (2.0f*pointsArray[3*i]) - pointsArray[3*i - 1];
-//           // next = (2.0f*midpoint) - pointsArray[3*i - 1];
-//            handlePointsArray[3*i + 1] = next;
 
-        }
-    
-    }
-    
-//    pointsArray[31] = pointsArray[0];
-//    pointsArray[0] =  pointsArray[31];
-//    handlePointsArray.push_back(pointsArray[30]);
-//    handlePointsArray.push_back(pointsArray[1]);
-//    glm::vec3 midpoint, prev, next;
-//    
-//    //30 31/0 1
-//    midpoint = (pointsArray[30] + pointsArray[1])/2.0f;
-//    handlePointsArray[0] = midpoint;
-//    prev = (2.0f*pointsArray[0]) - pointsArray[1];
-//    handlePointsArray[30] = prev;
-//    next = (2.0f*pointsArray[0]) - pointsArray[30];
-//    handlePointsArray[1] = next;
-    
-
-    
-    
     //handlePointsArray;
-     handlePointsArray = pointsArray;
-    
-    //cout << pointsArray.size() << " size of points " << endl;
-   // cout << handlePointsArray.size() << " size of handle points " << endl;
-
-
+    handlePointsArray = pointsArray;
     
     // Create array object and buffers. Remember to delete your buffers when the object is destroyed!
     glGenVertexArrays(1, &handlePointVAO);
@@ -346,12 +286,6 @@ void BezierCurve::computeVertices(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm:
                           3 * sizeof(GLfloat), // Offset between consecutive indices. Since each of our vertices have 3 floats, they should have the size of 3 floats in between
                           (GLvoid*)0); // Offset of the first vertex's component. In our case it's 0 since we don't pad the vertices array with anything.
     
-    //    // We've sent the vertex data over to OpenGL, but there's still something missing.
-    //    // In what order should it draw those vertices? That's why we'll need a GL_ELEMENT_ARRAY_BUFFER for this.
-    //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    
-    //cout << "The size of indices..."  << sizeof(indices) << endl;
     // Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     // Unbind the VAO now so we don't accidentally tamper with it.

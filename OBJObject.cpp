@@ -131,7 +131,7 @@ void OBJObject::parse(const char *filepath)
     FILE* fp;  //file pointer
    
     float x,y,z; //vertex coordinates
-    unsigned int v1, v2, v3, vn1, vn2, vn3; // index/face
+    unsigned int v1, v2, v3, v4, vn1, vn2, vn3, vn4; // index/face
     float r,g,b; //vertex color
     int c1,c2; //characters read from file
     glm::vec3 vertex; //3-compenent vector to store vertex
@@ -155,7 +155,7 @@ void OBJObject::parse(const char *filepath)
     {
        
         //read normal data accordingly
-        
+    //cout <<  (char) c1 << " " << (char) c2 << " " << endl;
         if (c1 == '#' || c2 == '#') {
             //Scan until we reach a new line to update file pointer
             while (c1 != '\n'){
@@ -165,8 +165,10 @@ void OBJObject::parse(const char *filepath)
                     break;
                 }
             }
+    
         }
-        else if (c1 == 'v' && c2 == ' ')
+        
+        if (c1 == 'v' && c2 == ' ')
         {
             //fscanf() reads data from the stream and stores them according to the parameter format into the locations pointed by the additional arguments
             fscanf(fp, "%f %f %f %f %f %f", &x, &y, &z, &r, &g, &b);
@@ -175,6 +177,10 @@ void OBJObject::parse(const char *filepath)
             
             //append vec3 to vertices vector
             vertices.push_back(vertex);
+            
+        
+               // c1 = fgetc(fp);
+            
         }
         else if (c1 == 'v' && c2 == 'n')
         {
@@ -185,6 +191,9 @@ void OBJObject::parse(const char *filepath)
             //normal = glm::normalize(normal);
             //append normal vector to normals vector
             normals.push_back(normal);
+            
+               // c1 = fgetc(fp);
+            
         
         }
         else if (c1 == 'f' && c2 == ' ') {
@@ -194,25 +203,30 @@ void OBJObject::parse(const char *filepath)
             v1 = v1 - 1;
             v2 = v2 - 1;
             v3 = v3 - 1;
+            //v4 = v4 - 1;
             
             indices.push_back(v1);
             indices.push_back(v2);
             indices.push_back(v3);
+            //indices.push_back(v4);
+               // c1 = fgetc(fp);
+            
         }
         
+//        cout <<  (char) c1 << " " << (char) c2 << " " << endl;
         c1 = fgetc(fp);
         c2 = fgetc(fp);
-    
+        
     }
    
     //close file when done
     fclose(fp);
- 
+// 
 //    cout << "Finished parsing..." << endl;
 //        cout << "size of vectors.. " << vertices.size() << endl;
 //        cout << "size of vnormals.. " << normals.size() << endl;
 //        cout << "size of indices.. " << indices.size() << endl;
-
+//
     
     findCenter(); //center!
     
@@ -231,6 +245,7 @@ void OBJObject::draw(GLuint shaderProgram)
     uModelview = glGetUniformLocation(shaderProgram, "modelview");
     view = glGetUniformLocation(shaderProgram, "view");
     model = glGetUniformLocation(shaderProgram, "model");
+    GLuint camPos = glGetUniformLocation(shaderProgram, "camPos");
     
     // Now send these values to the shader program
     glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
@@ -242,23 +257,24 @@ void OBJObject::draw(GLuint shaderProgram)
     // Now draw the object. We simply need to bind the VAO associated with it.
     glBindVertexArray(VAO);
     
-    
-    if(matMode == 0){
-        renderMaterial(shaderProgram, matMode);
-    }
-    else if (matMode == 1)
-    {
-        renderMaterial(shaderProgram, matMode);
-    }
-    else if (matMode == 2)
-    {
-        renderMaterial(shaderProgram, matMode);
-    }
-    else if (matMode == 3) {
-        GLuint materialAttr = glGetUniformLocation(shaderProgram, "material.mode");
-        glUniform1i(materialAttr, matMode);
-    }
-    
+    glm::vec3 cam_pos(0.0f, 0.0f, 200.0f);		// e  | Position of camera
+    glUniform3f(camPos,cam_pos[0],cam_pos[1],cam_pos[2]);
+//    if(matMode == 0){
+//        renderMaterial(shaderProgram, matMode);
+//    }
+//    else if (matMode == 1)
+//    {
+//        renderMaterial(shaderProgram, matMode);
+//    }
+//    else if (matMode == 2)
+//    {
+//        renderMaterial(shaderProgram, matMode);
+//    }
+//    else if (matMode == 3) {
+//        GLuint materialAttr = glGetUniformLocation(shaderProgram, "material.mode");
+//        glUniform1i(materialAttr, matMode);
+//    }
+//    
     // Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     // Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
@@ -266,7 +282,7 @@ void OBJObject::draw(GLuint shaderProgram)
 
 }
 
-void OBJObject::drawSpere(GLuint shaderProgram)
+void OBJObject::drawSphere(GLuint shaderProgram)
 {
     
     // Calculate the combination of the model and view (camera inverse) matrices
@@ -276,33 +292,39 @@ void OBJObject::drawSpere(GLuint shaderProgram)
     // Consequently, we need to forward the projection, view, and model matrices to the shader programs
     // Get the location of the uniform variables "projection" and "modelview"
     uProjection = glGetUniformLocation(shaderProgram, "projection");
-    uModelview = glGetUniformLocation(shaderProgram, "modelview");
-//    view = glGetUniformLocation(shaderProgram, "view");
-//    model = glGetUniformLocation(shaderProgram, "model");
-//    
+    //uModelview = glGetUniformLocation(shaderProgram, "modelview");
+    view = glGetUniformLocation(shaderProgram, "view");
+    model = glGetUniformLocation(shaderProgram, "model");
+//
+     GLuint camPos = glGetUniformLocation(shaderProgram, "camPos");
     // Now send these values to the shader program
     glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
-    glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
-   // glUniformMatrix4fv(view, 1, GL_FALSE, &Window::V[0][0]);
-   // glUniformMatrix4fv(model, 1, GL_FALSE, &toWorld[0][0]);
-    
-    
+    //glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
+    glUniformMatrix4fv(view, 1, GL_FALSE, &Window::V[0][0]);
+    glUniformMatrix4fv(model, 1, GL_FALSE, &toWorld[0][0]);
+
+    glm::vec3 cam_pos(0.0f, 0.0f, 200.0f);		// e  | Position of camera
+    glUniform3f(camPos,cam_pos[0],cam_pos[1],cam_pos[2]);
+
     // Now draw the object. We simply need to bind the VAO associated with it.
     glBindVertexArray(VAO);
     
 //    cout << matMode << endl;
-    if (matMode == 1)
-    {
-        renderMaterial(shaderProgram, matMode);
-    }
-    else if (matMode == 2)
-    {
-        renderMaterial(shaderProgram, matMode);
-    }
+//    if (matMode == 1)
+//    {
+//        renderMaterial(shaderProgram, matMode);
+//    }
+//    else if (matMode == 2)
+//    {
+//        renderMaterial(shaderProgram, matMode);
+//    }
 
     
     // Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+   // glPointSize(1.0f);
+  // glDrawElements(GL_POINTS, indices.size(), GL_UNSIGNED_INT, 0);
+   // glDrawElements(GL_LINE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
     // Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
     glBindVertexArray(0);
     

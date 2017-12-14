@@ -47,6 +47,7 @@ void main()
     mat3 normalMatrix = transpose(inverse(mat3(model)));
     Normal = normalize(normalMatrix * aNormal);
     
+  
     //Calculate point with respect to camera space
     //eye = -(modelview * position);
 
