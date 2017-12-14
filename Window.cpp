@@ -380,8 +380,8 @@ void Window::display_callback(GLFWwindow* window)
  
     glUseProgram(particleShaderProgram);
     //spiralPtr->render(particleShaderProgram);
-    //beltPtr->render(particleShaderProgram);
-    //ringPtr->render(particleShaderProgram);
+    beltPtr->render(particleShaderProgram);
+    ringPtr->render(particleShaderProgram);
     
     //Draw roller Coaster
    // glUseProgram(curveShaderProgram);
