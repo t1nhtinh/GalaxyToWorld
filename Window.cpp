@@ -26,23 +26,23 @@ OBJObject * bird2;
 OBJObject * bird3;
 OBJObject * bird4;
 
-#define VERTEX_SHADER_PATH "../shader.vert"
-#define FRAGMENT_SHADER_PATH "../shader.frag"
+#define VERTEX_SHADER_PATH "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/shader.vert"
+#define FRAGMENT_SHADER_PATH "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/shader.frag"
 
-#define VERTEX_SKYBOXSHADER "../skyboxShader.vert"
-#define FRAGMENT_SKYBOXSHADER "../skyboxShader.frag"
+#define VERTEX_SKYBOXSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/skyboxShader.vert"
+#define FRAGMENT_SKYBOXSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/skyboxShader.frag"
 
-#define VERTEX_TOONSHADER "../environmentshader.vert"
-#define FRAGMENT_TOONSHADER "../environmentshader.frag"
+#define VERTEX_TOONSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/environmentshader.vert"
+#define FRAGMENT_TOONSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/environmentshader.frag"
 
-#define VERTEX_SELECTIONSHADER "../selection.vert"
-#define FRAGMENT_SELECTIONSHADER "../selection.frag"
+#define VERTEX_SELECTIONSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/selection.vert"
+#define FRAGMENT_SELECTIONSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/selection.frag"
 
-#define VERTEX_PARTICLESHADER "../particleShader.vert"
-#define FRAGMENT_PARTICLESHADER "../particleShader.frag"
+#define VERTEX_PARTICLESHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/particleShader.vert"
+#define FRAGMENT_PARTICLESHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/particleShader.frag"
 
-#define VERTEX_TERRAINSHADER "../terrainShader.vert"
-#define FRAGMENT_TERRAINSHADER "../terrainShader.frag"
+#define VERTEX_TERRAINSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/terrainShader.vert"
+#define FRAGMENT_TERRAINSHADER "/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/terrainShader.frag"
 
 // Default camera parameters
 glm::vec3 cam_pos(0.0f, 100.0f, 600.0f);		// e  | Position of camera
@@ -116,7 +116,9 @@ int birdIndex;
 
 void Window::initialize_objects()
 {
-	birdIndex = 0;
+	
+    
+    birdIndex = 0;
 	beltIndex = 40;
 	travel = false;
 	travelEnd = false;
@@ -133,7 +135,7 @@ void Window::initialize_objects()
     particleShaderProgram = LoadShaders(VERTEX_PARTICLESHADER, FRAGMENT_PARTICLESHADER);
     
     //Create the roller coaster using a sphere
-    coaster = new OBJObject ("sphere.obj");
+    coaster = new OBJObject ("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
     
     glm::mat4 scaleCoaster = glm::scale((glm::mat4(1.0f), glm::vec3(100.0f)));
     coaster->toWorld = scaleCoaster * coaster->toWorld;
@@ -150,7 +152,7 @@ void Window::initialize_objects()
 	branchGrowth = 1;
 
 	//Initialize the sun
-	sunSphere = new OBJObject("sphere.obj");
+	sunSphere = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
 	sun = glm::vec3(glm::vec3(415, 317, 438));
 	sunSphere->toWorld[3] = glm::vec4(sun,1.0f);
 	tZ = false;// switch for control over camera or sun
@@ -166,25 +168,25 @@ void Window::initialize_objects()
 //	spiralPtr->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -100.0f, 0.0f)) * spiralPtr->toWorld;
 	beltPtr = new ParticleSystem(800.0f, 1000.0f, 1);
 	ringPtr = new ParticleSystem(25.0f, 800.0f, 2);
-	birdPathPtr = new ParticleSystem(10.0f, 600.0f, 2);
+	//birdPathPtr = new ParticleSystem(10.0f, 600.0f, 2);
 
-
-	bird = new OBJObject("dove.obj");
-    bird->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
-	bird->toWorld = glm::translate(glm::mat4(1.0f),glm::vec3(-50,0,0)) * glm::scale(glm::mat4(1.0f),glm::vec3(300.0f)) *bird->toWorld;
-
-	bird2 = new OBJObject("dove.obj");
-    bird2->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
-	bird2->toWorld = glm::translate(glm::mat4(1.0f),glm::vec3(50,0,0)) * glm::scale(glm::mat4(1.0f),glm::vec3(300.0f)) *bird2->toWorld;
-
-	bird3 = new OBJObject("dove.obj");
-    bird3->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
-	bird3->toWorld = glm::translate(glm::mat4(1.0f),glm::vec3(0,30,0)) * glm::scale(glm::mat4(1.0f),glm::vec3(300.0f)) *bird3->toWorld;
-
-	bird4 = new OBJObject("dove.obj");
-    bird4->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
-	bird4->toWorld = glm::translate(glm::mat4(1.0f),glm::vec3(0,-30,0)) * glm::scale(glm::mat4(1.0f),glm::vec3(300.0f)) *bird4->toWorld;
-	//particlePtr->toWorld[3] = glm::vec4(100.0f);
+//
+//	bird = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/dove.obj");
+//    bird->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
+//	bird->toWorld = glm::translate(glm::mat4(1.0f),glm::vec3(-50,0,0)) * glm::scale(glm::mat4(1.0f),glm::vec3(300.0f)) *bird->toWorld;
+//
+//	bird2 = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/dove.obj");
+//    bird2->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
+//	bird2->toWorld = glm::translate(glm::mat4(1.0f),glm::vec3(50,0,0)) * glm::scale(glm::mat4(1.0f),glm::vec3(300.0f)) *bird2->toWorld;
+//
+//	bird3 = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/dove.obj");
+//    bird3->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
+//	bird3->toWorld = glm::translate(glm::mat4(1.0f),glm::vec3(0,30,0)) * glm::scale(glm::mat4(1.0f),glm::vec3(300.0f)) *bird3->toWorld;
+//
+//	bird4 = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/dove.obj");
+//    bird4->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
+//	bird4->toWorld = glm::translate(glm::mat4(1.0f),glm::vec3(0,-30,0)) * glm::scale(glm::mat4(1.0f),glm::vec3(300.0f)) *bird4->toWorld;
+//	//particlePtr->toWorld[3] = glm::vec4(100.0f);
 
 	procObj = new ProcObj();
 	procObj->toWorld = glm::translate(glm::mat4(), glm::vec3(0.0f, -800.0f, -1000.0f)) *  procObj->toWorld;
@@ -193,20 +195,20 @@ void Window::initialize_objects()
 	glm::mat4 transPlanet2 = glm::translate(glm::mat4(1.0f), glm::vec3(400.0f, -100.0f, 600.0f));
 
 	glm::mat4 planet1Scale = glm::scale(glm::mat4(1.0f), glm::vec3(150.0f));
-	planet1 = new OBJObject("sphere.obj");
+	planet1 = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
     planet1->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
 	planet1->toWorld = transPlanet * planet1Scale * planet1->toWorld;
 
-	birdPathPtr->toWorld = transPlanet * birdPathPtr->toWorld;
-	birdCoaster = birdPathPtr->pathArray;
+	//birdPathPtr->toWorld = transPlanet * birdPathPtr->toWorld;
+	//birdCoaster = birdPathPtr->pathArray;
 
-	planet2 = new OBJObject("sphere.obj");
+	planet2 = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/sphere.obj");
     planet2->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
 	planet2->toWorld = transPlanet2 * scaleCoaster * planet2->toWorld;
 
 	glm::mat4 transBunny2 = glm::translate(glm::mat4(1.0f), glm::vec3(150.0f, 08.0f, 380.0f));
 
-	bunny2 = new OBJObject("bunny.obj");
+	bunny2 = new OBJObject("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/bunny.obj");
 	bunny2->toWorld[3] = glm::vec4(cam_look_at, 1.0f);
 	bunny2->toWorld = transBunny2* scaleCoaster * bunny2->toWorld;
 
@@ -549,7 +551,7 @@ void Window::cleanGarden() {
 void Window::clean_up()
 {
 	delete(cube);
-	delete(bird);
+	//delete(bird);
 	delete(planet1);
 	delete(bunny2);
 	delete(planet2);
@@ -675,16 +677,16 @@ void Window::idle_callback()
 
 
 	}
-
-	if (birdIndex > birdCoaster.size()) {
-		birdIndex = 0;
-	}
-	bird->toWorld[3] = glm::vec4(birdCoaster[birdIndex]  + glm::vec3(planet1->toWorld[3]) + glm::vec3(-50,0,0),1.0f);
-	bird2->toWorld[3] = glm::vec4(birdCoaster[birdIndex] + glm::vec3(planet1->toWorld[3])+ glm::vec3(50,0,0),1.0f);
-	bird3->toWorld[3] = glm::vec4(birdCoaster[birdIndex] + glm::vec3(planet1->toWorld[3])+ glm::vec3(0,30,0),1.0f);
-	bird4->toWorld[3] = glm::vec4(birdCoaster[birdIndex] + glm::vec3(planet1->toWorld[3])+ glm::vec3(0,-30,0),1.0f);
-
-	birdIndex++;
+//
+//	if (birdIndex > birdCoaster.size()) {
+//		birdIndex = 0;
+//	}
+//	bird->toWorld[3] = glm::vec4(birdCoaster[birdIndex]  + glm::vec3(planet1->toWorld[3]) + glm::vec3(-50,0,0),1.0f);
+//	bird2->toWorld[3] = glm::vec4(birdCoaster[birdIndex] + glm::vec3(planet1->toWorld[3])+ glm::vec3(50,0,0),1.0f);
+//	bird3->toWorld[3] = glm::vec4(birdCoaster[birdIndex] + glm::vec3(planet1->toWorld[3])+ glm::vec3(0,30,0),1.0f);
+//	bird4->toWorld[3] = glm::vec4(birdCoaster[birdIndex] + glm::vec3(planet1->toWorld[3])+ glm::vec3(0,-30,0),1.0f);
+//
+//	birdIndex++;
 
 
     //moveCoaster();
@@ -743,10 +745,10 @@ void Window::display_callback(GLFWwindow* window)
 
     // Use the shader of programID
 	glUseProgram(shaderProgram);
-	bird->draw(shaderProgram);
-	bird2->draw(shaderProgram);
-	bird3->draw(shaderProgram);
-	bird4->draw(shaderProgram);
+//	bird->draw(shaderProgram);
+//	bird2->draw(shaderProgram);
+//	bird3->draw(shaderProgram);
+//	bird4->draw(shaderProgram);
     
 	glUseProgram(toonShaderProgram);
 	GLuint uLightPos = glGetUniformLocation(toonShaderProgram, "lightPosInput");

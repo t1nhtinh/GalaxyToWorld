@@ -18,16 +18,16 @@ void main()
     
     //render water
     if (h < -40.0) {
-        FragColor =  mix(texture(texture0, TexCoord), texture(texture1, TexCoord), 0.5);
-        //FragColor = texture(texture0, TexCoord);
+        //FragColor =  mix(texture(texture0, TexCoord), texture(texture1, TexCoord), 0.5);
+        FragColor = texture(texture0, TexCoord);
     }
     //render land maters
     else if (h < -20.0) {
         FragColor = texture(texture2, TexCoord);
     }
     else if (h < 0){
-       // FragColor = texture(texture2, TexCoord);
-        FragColor =  mix(texture(texture2, TexCoord), texture(texture3, TexCoord), 0.4);
+        FragColor = texture(texture2, TexCoord);
+       // FragColor =  mix(texture(texture2, TexCoord), texture(texture3, TexCoord), 0.4);
     }
     //render land
     else if (h < 20.0) {

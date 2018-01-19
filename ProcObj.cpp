@@ -392,7 +392,7 @@ void ProcObj::renderMaterial(){
     //loops through all 6 texture targets
    // for (unsigned int i = 0; i < faces.size(); i++)
    // {
-    unsigned char *data = stbi_load("../texture/water2.jpg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/water2.jpg", &width, &height, &nrChannels, 0);
         if (data)
         {
             //Once glTexImage2D is called, the currently bound texture object now has the texture image attached to it.
@@ -417,7 +417,7 @@ void ProcObj::renderMaterial(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    data = stbi_load("../texture/water1.jpg", &width, &height, &nrChannels, 0);
+    data = stbi_load("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/water1.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
         
@@ -441,7 +441,7 @@ void ProcObj::renderMaterial(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    data = stbi_load("../texture/rock.jpg", &width, &height, &nrChannels, 0);
+    data = stbi_load("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/rock.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
         
@@ -465,7 +465,7 @@ void ProcObj::renderMaterial(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    data = stbi_load("../texture/stone.jpg", &width, &height, &nrChannels, 0);
+    data = stbi_load("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stone.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
         
@@ -489,7 +489,7 @@ void ProcObj::renderMaterial(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    data = stbi_load("../texture/snow.jpg", &width, &height, &nrChannels, 0);
+    data = stbi_load("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/snow.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
         

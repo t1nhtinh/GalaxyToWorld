@@ -44,7 +44,7 @@ vec3 ambient(){
 vec3 specular(vec3 viewPos,vec3 fragPos, vec3 lightDir, vec3 norm) {
     vec3 viewDir = normalize(viewPos - fragPos);
 	vec3 reflectDir = reflect(-lightDir, normalize(norm));
-	float result = pow(max(dot(viewDir, reflectDir),0.0),16f);
+	float result = pow(max(dot(viewDir, reflectDir),0.0),16.0f);
 
     vec3 lightColor = vec3(1.0f);
 	vec3 materialSpec= vec3(0.5f,0.5f,0.5f);

@@ -18,12 +18,12 @@ Cube::Cube()
 {
 	toWorld = glm::mat4(1.0f);
 
-    images.push_back("../texture/stratosphere_ft.tga");
-    images.push_back("../texture/stratosphere_bk.tga");
-    images.push_back("../texture/stratosphere_up.tga");
-    images.push_back("../texture/stratosphere_dn.tga");
-    images.push_back("../texture/stratosphere_rt.tga");
-    images.push_back("../texture/stratosphere_lf.tga");
+    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_ft.tga");
+    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_bk.tga");
+    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_up.tga");
+    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_dn.tga");
+    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_rt.tga");
+    images.push_back("/Users/tinhdang/Documents/UCSD/CSE167_IntroToComputerGraphics/GalaxyToWorld/GalaxyToWorld/texture/stratosphere_lf.tga");
 	cubemap = loadCubemap(images);
     
  //   cubemapTexture = loadCubemap(images);
